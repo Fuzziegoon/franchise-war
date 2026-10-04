@@ -103,3 +103,30 @@ describe('articles', () => {
     expect(leak).toBeGreaterThan(0);
   });
 });
+
+import { RESULT_RE } from './storyData';
+
+describe('before any games are logged', () => {
+  const none: LeagueData = { teams: sampleTeams, players: samplePlayers, games: [], season: 1, week: 1 };
+  it('has no stories or tweets that talk about results or how someone has been playing', () => {
+    for (const wk of [0, 1]) {
+      const d = { ...none, week: wk };
+      const idx = buildIndex(d);
+      expect(idx.hasResults).toBe(false);
+      for (const n of generateNews(d, idx, 12)) expect(n.headline + ' ' + n.body).not.toMatch(RESULT_RE);
+      for (const t of generateTweets(d, idx, 40)) expect(t.text).not.toMatch(RESULT_RE);
+    }
+  });
+  it('still fills the page with enough previews, predictions and worries', () => {
+    const idx = buildIndex(none);
+    expect(generateNews(none, idx, 8).length).toBeGreaterThanOrEqual(6);
+    expect(generateTweets(none, idx, 24).length).toBeGreaterThanOrEqual(15);
+  });
+  it('does not mention records or streaks in articles', () => {
+    const idx = buildIndex(none);
+    for (const n of weekNews(none, idx)) {
+      const a = composeArticle(n, none, idx);
+      expect(a.paragraphs.join(' ')).not.toMatch(/\b\d+-\d+ this season|won \d+ straight|dropped \d+ in a row/);
+    }
+  });
+});

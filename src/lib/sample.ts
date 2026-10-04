@@ -725,6 +725,18 @@ export const sampleArticles = [
 "Published": "2026-10-04"
 },
 {
+"ArticleID": "SAMPLE-T1",
+"Season": 1,
+"Week": 2,
+"Type": "Tweet",
+"Subjects": "CIN; CHI",
+"Headline": "Sample tweet. In the real site these are written after each batch of stats goes into the Sheet.",
+"Summary": "",
+"Key facts used": "LeagueInsiderLou|League Insider Lou|Y",
+"Status": "Published",
+"Published": "2026-10-04"
+},
+{
 "ArticleID": "SAMPLE-V1",
 "Season": 1,
 "Week": 2,

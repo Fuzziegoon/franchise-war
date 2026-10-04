@@ -102,6 +102,8 @@ export interface Index {
   playerTags: Map<string, Set<string>>;
   coachTeams: TeamCtx[];
   skillPlayers: Map<string, Player[]>;
+  /** True once at least one scored game of the season exists. Results-flavored stories stay hidden until then. */
+  hasResults: boolean;
 }
 
 const isHuman = (c: unknown) => typeof c === 'string' && c.trim() !== '' && c.trim().toUpperCase() !== 'CPU';
@@ -169,7 +171,8 @@ export function buildIndex(d: LeagueData): Index {
       ps.filter((p) => ['qb', 'rb', 'wr', 'te', 'dl', 'lb', 'db'].includes(GROUP[String(p.Position)] ?? '')).slice(0, 4),
     );
   }
-  return { teams, playerTags: playerTagMap, coachTeams, skillPlayers };
+  const hasResults = d.games.some((g) => num(g.Season) === d.season && isFinal(g) && g.Stage !== 'Preseason' && (num(g.Week) ?? 0) <= d.week);
+  return { teams, playerTags: playerTagMap, coachTeams, skillPlayers, hasResults };
 }
 
 // ------------------------------------------------------------------ slots
@@ -267,7 +270,7 @@ export function generateNews(d: LeagueData, idx: Index, count = 8): NewsItem[] {
   const used = newUsed();
   const out: NewsItem[] = [];
   const catCap = Math.max(2, Math.ceil(count / 3));
-  const pool = rng.shuffle(NEWS.map((t, i) => ({ t, i }))).filter(({ t }) => inWeek(t.wk, d.week));
+  const pool = rng.shuffle(NEWS.map((t, i) => ({ t, i }))).filter(({ t }) => inWeek(t.wk, d.week) && (!t.played || idx.hasResults) && !(t.wk && t.wk[1] <= 1 && idx.hasResults));
 
   const attempt = (coachOnly: boolean) => {
     for (const { t, i } of pool) {
@@ -445,12 +448,13 @@ function engagement(rng: Rng, acct: Account, boost: number) {
   return { likes, rts: Math.round(likes * (0.06 + rng.next() * 0.2)), replies: Math.round(likes * (0.03 + rng.next() * 0.1)) };
 }
 
-export function generateTweets(d: LeagueData, idx: Index, count = 24): TweetItem[] {
+export function generateTweets(d: LeagueData, idx: Index, count = 24, opts: { filler?: boolean } = {}): TweetItem[] {
+  const filler = opts.filler ?? true;
   const rng = makeRng(`tweets|${d.season}|${d.week}`);
   const used = newUsed();
   const out: TweetItem[] = [];
   const catCap = Math.max(3, Math.ceil(count / 3));
-  const pool = rng.shuffle(TWEETS.map((t, i) => ({ t, i }))).filter(({ t }) => inWeek(t.wk, d.week));
+  const pool = rng.shuffle(TWEETS.map((t, i) => ({ t, i }))).filter(({ t }) => inWeek(t.wk, d.week) && (!t.played || idx.hasResults) && !(t.wk && t.wk[1] <= 1 && idx.hasResults));
 
   const make = (t: TweetTpl, i: number, coachOnly: boolean): TweetItem | null => {
     let slots: Slots | null = null;
@@ -509,8 +513,10 @@ export function generateTweets(d: LeagueData, idx: Index, count = 24): TweetItem
       if (item) out.push(item);
     }
   };
-  if (idx.coachTeams.length) run(Math.round(count * 0.4), true);
-  run(count, false);
+  if (filler) {
+    if (idx.coachTeams.length) run(Math.round(count * 0.4), true);
+    run(count, false);
+  }
 
   // around-the-league highlights from the week's logged games
   const rng2 = makeRng(`highlights|${d.season}|${d.week}`);
@@ -556,8 +562,11 @@ export function generateTweets(d: LeagueData, idx: Index, count = 24): TweetItem
 // ------------------------------------------------------------------ full articles
 
 /** The news column for a week: coach recaps first, then generated stories. Home and the article page both use this. */
+export const isPreviewWeek = (week: number) => week <= 1;
+
+/** After the opening preview, headlines come from the Sheet. Only the factual game recaps are generated. */
 export function weekNews(d: LeagueData, idx: Index): NewsItem[] {
-  return [...generateRecaps(d, idx), ...generateNews(d, idx, 8)];
+  return [...generateRecaps(d, idx), ...(isPreviewWeek(d.week) ? generateNews(d, idx, 8) : [])];
 }
 
 export interface Article2 {

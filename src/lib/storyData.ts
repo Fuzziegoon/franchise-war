@@ -29,6 +29,8 @@ export interface NewsTpl {
   b: string;
   wk?: [number, number];
   cat: string;
+  /** Talks about results or how someone has been playing, so it needs logged games. Set automatically by RESULT_RE. */
+  played?: boolean;
 }
 export interface TweetTpl {
   who: Who;
@@ -36,6 +38,8 @@ export interface TweetTpl {
   t: string;
   wk?: [number, number];
   cat: string;
+  /** Talks about results or how someone has been playing, so it needs logged games. Set automatically by RESULT_RE. */
+  played?: boolean;
 }
 
 const N = (cat: string, who: Who, need: string, h: string, b: string, wk?: [number, number]): NewsTpl => ({ cat, who, need, h, b, wk });
@@ -503,6 +507,35 @@ export const TWEETS: TweetTpl[] = [
   W('leak-comic', 'T', 'hot', 'Dewey on the {tf}: so good this week the other team asked if they could watch from the sideline.'),
   W('leak-comic', 'T', 'any', 'Dewey: breaking news, the {tf} are a football team. More as it develops.'),
   W('leak-comic', 'L', 'any', 'Dewey: the NFL schedule is just a very long group chat that sometimes becomes football.'),
+
+  // ---------------------------------------------------------------- before the games: previews, predictions, worries
+  W('hottake', 'P', 'qb+good', 'Bold prediction: {p} throws for a monster year and the {t} are a problem in the {tc} division.', [0, 1]),
+  W('hottake', 'P', 'star', 'Bold prediction: {p} is the MVP and nobody is going to be surprised by the end of it.', [0, 1]),
+  W('hottake', 'P', 'rookie+good', 'Early bold take: {p} turns the Rookie of the Year race into a two-man contest.', [0, 1]),
+  W('hottake', 'P', 'healthy+vet', 'Hot take: {p} is going to remind everybody this season why he was a first-rounder.', [0, 1]),
+  W('hottake', 'P', 'payday', 'Preseason hot take: {p} is the most underpaid {pos} in the league. Pay the man.', [0, 1]),
+  W('hottake', 'T', 'any', 'Preseason hot take: the {tf} are a sleeper. You will remember I said this.', [0, 1]),
+  W('hottake', 'T', 'any', 'Bold prediction: the {tf} take the division. Sorry in advance to everybody in it.', [0, 1]),
+  W('hottake', 'T', 'any', 'Hot take: the {tf} miss the playoffs. I said what I said and I will not be taking questions.', [0, 1]),
+  W('hottake', 'T', 'coach', 'Hot take: {coach} has the best roster on paper and the pressure to match. The {t} had better deliver.', [0, 1]),
+  W('hottake', 'T', 'rivalry', 'Prediction: {coach} and {rival} meet in the big game. Neither one is going to be quiet about it.', [0, 1]),
+  W('hottake', 'L', 'any', 'Hot take: this is going to be the best season of football in a decade, and week one has not even kicked off yet.', [0, 1]),
+  W('hottake', 'L', 'any', 'Preseason take: half the teams everybody picked to win it all will be home by January.', [0, 1]),
+  W('hatemail', 'P', 'star', 'Dear {p}: get through week one healthy. That is all I am asking. Signed, {tc}.', [0, 1]),
+  W('hatemail', 'P', 'qb', 'Dear {p}: do not make week one a nail-biter. My heart cannot take another year of the {t}.', [0, 1]),
+  W('hatemail', 'P', 'rookie', 'Rookie {p}, welcome to the league. No pressure. Just the whole city of {tc} watching.', [0, 1]),
+  W('hatemail', 'P', 'paid', 'Dear {p}: with that contract the {tc} expectations are in orbit. Good luck. Please do not stumble.', [0, 1]),
+  W('hatemail', 'P', 'vet', 'Dear {p}: I have a lot of feelings about the {t} this season and most of them are nerves.', [0, 1]),
+  W('hatemail', 'P', 'st', 'Dear {p}: if the game comes down to a kick, I am going to need you to be perfect. No pressure.', [0, 1]),
+  W('leak-comic', 'P', 'any', 'Dewey: {p} is reportedly ready for the year. I am ready for snacks. We are not the same.', [0, 1]),
+  W('leak-loud', 'P', 'qb', 'I want it on the record before a single snap is taken: {p} is the make-or-break player for the {tc} season!', [0, 1]),
+  W('leak-loud', 'L', 'any', 'WEEK ONE IS COMING and I have never been more ready to be right about everything!', [0, 1]),
+  W('leak-scoop', 'T', 'any', 'Hearing the {t} are feeling very good about their depth chart heading into the opener. Take that however you like.', [0, 1]),
+  W('leak-film', 'T', 'any', 'Preseason tape on the {tf}: the front seven is where this season is decided.', [0, 1]),
+  W('leak-ex', 'P', 'rookie', 'Rookies get their real welcome in week one. {p} is about to find out what it feels like.', [0, 1]),
+  W('leak-rex', 'T', 'any', 'Rex on the {tf}: this is the year. Gil is wrong. We start the clock now.', [0, 1]),
+  W('leak-gil', 'T', 'any', 'Gil on the {tf}: the preseason hype is a lot. I need to see it before I believe it.', [0, 1]),
+  W('leak-stats', 'L', 'any', 'Preseason note: every team is undefeated and every fan is a genius. Check back in four weeks.', [0, 1]),
 ];
 
 // Game highlights (used for the "around the league" feed)
@@ -586,3 +619,29 @@ export const ACCOUNTS: Account[] = [
   { handle: 'FourthAndForget', name: 'Fourth And Forget', kind: 'comic' },
   { handle: 'ZebraWatch', name: 'Zebra Watch', kind: 'comic' },
 ];
+
+
+// ------------------------------------------------------------------------------------------------ results gating
+/**
+ * Anything that sounds like it follows real games (performance, a result, a streak) is hidden until the Sheet has a
+ * logged game for the season. Before that, only previews, contract talk, injuries, hype and takes about the future show up.
+ */
+export const RESULT_RE = new RegExp(
+  [
+    'played', 'playing', 'that kick', 'one yard', 'catch the ball', 'a drop', 'drops it', '2-minute drill', 'that was your guy',
+    'RIGHT THERE', 'hold the ball', 'you can tackle', 'block somebody', 'throw the ball', 'throws one more', 'heart attack',
+    'ruining my week', 'mess up', 'have won', 'back-to-back', 'lead their division', 'winning at the line',
+    'late on every rotation', 'who I said they were', 'mirage', 'turnaround', 'one win from', 'crisis', 'red hot', 'not a fluke',
+    'already over', '0-17', 'than their record', 'record says', 'reason I am tired', 'scream at my TV', 'going to make a defense',
+    'cooked', 'run away', 'ran away', 'survive', 'upset', 'stun', 'last week', 'last game', 'coming off', 'still doing this',
+    'keeps showing up', 'outlasted', 'on a roll', 'on fire', 'rolling', 'streak', 'in a row', 'straight', 'winless', 'lost',
+    'losing', 'beat ', 'win the', 'turning heads', 'all week', 'looks like it paid off', 'earning that money', 'is earning',
+    'making all that money and STILL', 'stop doing the thing', 'patient', 'rolled', 'playing like', 'so good this week', 'so bad this week',
+  ].map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
+  'i',
+);
+const preview = (t: { wk?: [number, number] }) => !!t.wk && t.wk[1] <= 1;
+for (const t of NEWS) if (!preview(t) && RESULT_RE.test(t.h + ' ' + t.b)) t.played = true;
+for (const t of RECAPS) t.played = true;
+for (const t of TWEETS) if (!preview(t) && RESULT_RE.test(t.t)) t.played = true;
+for (const t of HIGHLIGHTS) t.played = true;

@@ -56,3 +56,11 @@ and columns. In the browser it's kept for the current tab only (sessionStorage) 
 ## Next phases (not built yet)
 Screenshot intake (AI reads box scores, you confirm), stat-line entry, fan social feed + beat writers,
 AI story drafts, history/records pages, draft class import, cutscene creator.
+
+## Weekly workflow
+
+1. Enter the week's games and stats in the Sheet (Games, player stat tabs, injuries, moves).
+2. Ask Claude to write the week. Claude reads the Sheet and adds rows to the **Articles** tab: written stories, `Tweet` rows, and `Video: ...` rows.
+3. The new week appears in the site's week picker as soon as it has one Published row. Week 1 is always there and gets generic preview coverage; later weeks only show what was written for them plus factual game recaps and scoreboards.
+
+Tweet rows: Type `Tweet`, Headline = tweet text, Subjects = team abbrs and/or a PlayerID (`;` separated), Key facts used = `handle|Display Name|Y or N verified|badge|reply-to name` (last two optional).

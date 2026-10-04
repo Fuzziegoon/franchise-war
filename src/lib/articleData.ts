@@ -17,7 +17,7 @@ export const P_CONTEXT: Para[] = [
   P('rookie', 'At just {age}, {p} is still learning the speed of the league, but the {t} like the ceiling and the work ethic they have seen so far.'),
   P('vet', 'Experience matters, and {p} has plenty of it. At {age}, the mental side of the game is as big a part of his value as athleticism, and the {t} locker room leans on it.'),
   P('ancient', 'Not many players are still doing this at {age}. {p} has outlasted most of his draft class, and the {t} are happy to keep reaping the benefits.'),
-  P('payday', 'On the business side, {p} is playing well above what his current deal suggests. That math tends to lead to a long negotiation, and the {t} front office knows the clock is ticking.'),
+  P('payday', 'On the business side, {p} is on a deal that looks small next to his rating. That math tends to lead to a long negotiation, and the {t} front office knows the clock is ticking.'),
   P('paid', 'With a contract this size, the expectations are sky high. Every snap gets measured against the number, and {p} knows it.'),
   P('qb', 'The {t} offense runs through {p}. When the quarterback is right, everything else follows, and when he is not, the whole building feels it.'),
   P('mate', 'He is not alone, either. With {p2} alongside him, the {t} have more than one reason to feel good about the roster.'),

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLeague } from '../lib/league';
-import { buildIndex, generateTweets, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
+import { curatedTweets, isTweet, releasedWeeks } from '../lib/curated';
+import { buildIndex, generateTweets, isPreviewWeek, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
 import { coachRecords, pct, recordText } from '../lib/standings';
 import { num, type Article } from '../lib/types';
 import { embedUrl, isVideo, thumbUrl, videoBlurb, videoIdOf, videoKindOf } from '../lib/video';
@@ -22,26 +23,23 @@ type Filter = 'all' | 'coach' | 'league';
 export default function Home() {
   const { articles, games, teams, players, season, loading } = useLeague();
 
-  const latestWeek = useMemo(() => {
-    const weeks = games.filter((g) => num(g.Season) === season && num(g['Home Score']) !== null).map((g) => num(g.Week) ?? 0);
-    return weeks.length ? Math.max(...weeks) : 1;
-  }, [games, season]);
+  const weeks = useMemo(() => releasedWeeks(articles, season), [articles, season]);
   const [picked, setPicked] = useState<number | null>(null);
-  const week = picked ?? latestWeek;
+  const week = picked !== null && weeks.includes(picked) ? picked : weeks[weeks.length - 1];
   const [filter, setFilter] = useState<Filter>('all');
 
   const published = articles
     .filter((a) => a.Status === 'Published' && num(a.Season) === season)
     .sort((a, b) => String(b.Published).localeCompare(String(a.Published)) || (num(b.Week) ?? 0) - (num(a.Week) ?? 0));
   const videos = published.filter(isVideo);
-  const written = published.filter((a) => !isVideo(a) && num(a.Week) === week);
+  const written = published.filter((a) => !isVideo(a) && !isTweet(a) && num(a.Week) === week);
   const featured = videos[0];
 
   const data = useMemo(() => ({ teams, players, games, season, week }), [teams, players, games, season, week]);
   const idx = useMemo(() => buildIndex(data), [data]);
   const news = useMemo(() => weekNews(data, idx), [data, idx]);
   const tweets = useMemo(() => {
-    const base = generateTweets(data, idx, 26);
+    const base = [...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26, { filler: isPreviewWeek(week) })];
     const v = videos[0];
     if (!v) return base;
     const vt: TweetItem = {
@@ -50,13 +48,12 @@ export default function Home() {
     };
     return [vt, ...base];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, idx, videos[0]?.ArticleID]);
+  }, [data, idx, videos[0]?.ArticleID, articles, season, week]);
 
   const coaches = coachRecords(games);
   const humanTeams = teams.filter((t) => t['Head Coach'] && String(t['Head Coach']).toUpperCase() !== 'CPU');
 
   const shownTweets = tweets.filter((t) => filter === 'all' || (filter === 'coach' ? t.scope === 'coach' : t.scope !== 'coach'));
-  const weeks = Array.from({ length: 23 }, (_, i) => i);
 
   return (
     <>
@@ -110,7 +107,7 @@ export default function Home() {
           <section className="panel">
             <h2>League News <span className="small muted">{weekLabel(week)}</span></h2>
             {written.map((a) => <WrittenCard key={a.ArticleID} a={a} />)}
-            {news.length === 0 && written.length === 0 && <p className="muted small">No stories yet for this week.</p>}
+            {news.length === 0 && written.length === 0 && <p className="muted small">Coverage for this week is on the way.</p>}
             {news.map((n) => <NewsCard key={n.id} n={n} season={season} week={week} />)}
           </section>
 
