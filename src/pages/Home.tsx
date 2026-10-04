@@ -4,7 +4,8 @@ import { useLeague } from '../lib/league';
 import { curatedTweets, isTweet, momentTweets, releasedWeeks } from '../lib/curated';
 import { buildIndex, generateTweets, isPreviewWeek, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
 import { coachRecords, pct, recordText } from '../lib/standings';
-import { num, type Article } from '../lib/types';
+import { lastWeekScores } from '../lib/scores';
+import { num, type Article, type Game } from '../lib/types';
 import { embedUrl, isVideo, thumbUrl, videoBlurb, videoIdOf, videoKindOf } from '../lib/video';
 
 const WEEK_LABELS: Record<number, string> = { 0: 'Preseason', 19: 'Wild Card', 20: 'Divisional', 21: 'Conference', 22: 'Super Bowl' };
@@ -105,6 +106,7 @@ export default function Home() {
       {loading && !players.length ? <p className="muted">Loading the league…</p> : (
         <div className="split">
           <section className="panel">
+            <ScoresPanel games={games} season={season} week={week} />
             <h2>League News <span className="small muted">{weekLabel(week)}</span></h2>
             {written.map((a) => <WrittenCard key={a.ArticleID} a={a} />)}
             {news.length === 0 && written.length === 0 && <p className="muted small">Coverage for this week is on the way.</p>}
@@ -138,6 +140,30 @@ function Subjects({ teams, playerId }: { teams: string[]; playerId?: string }) {
     <div className="subjects">
       {playerId && <Link to={`/player/${playerId}`} className="chip">Player page</Link>}
       {teams.map((t) => <Link key={t} to={`/team/${t}`} className="chip">{t}</Link>)}
+    </div>
+  );
+}
+
+function ScoresPanel({ games, season, week }: { games: Game[]; season: number; week: number }) {
+  const last = useMemo(() => lastWeekScores(games, season, week), [games, season, week]);
+  if (!last) return null;
+  const coach = (c: string) => (c && c !== 'CPU' ? ` (${c})` : '');
+  return (
+    <div className="scores-panel">
+      <h2>Last Week's Scores <span className="small muted">{weekLabel(last.week)}</span></h2>
+      <div className="scores-grid">
+        {last.list.map((g) => {
+          const hs = num(g['Home Score']) ?? 0, as = num(g['Away Score']) ?? 0;
+          const versus = String(g['1v1?'] || '').toLowerCase().startsWith('y');
+          return (
+            <div className={versus ? 'score-card versus' : 'score-card'} key={g.GameID}>
+              <small>{versus ? 'FINAL · COACH VS COACH' : 'FINAL'}</small>
+              <Link to={`/team/${g.Away}`} className={as > hs ? 'win' : ''}><span>{g.Away}<i>{coach(g['Away Coach'])}</i></span><b>{as}</b></Link>
+              <Link to={`/team/${g.Home}`} className={hs > as ? 'win' : ''}><span>{g.Home}<i>{coach(g['Home Coach'])}</i></span><b>{hs}</b></Link>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

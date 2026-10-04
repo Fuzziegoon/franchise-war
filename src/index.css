@@ -189,3 +189,13 @@ button { border-radius: 4px; }
 .more a:hover { color: var(--accent); }
 
 button.danger { background: var(--bad); color: #fff; }
+
+/* Last week's scores */
+.scores-panel { margin-bottom: 1.2rem; }
+.scores-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .6rem; }
+.score-card { border: 1px solid var(--line); border-radius: 8px; padding: .5rem .7rem; display: grid; gap: .15rem; background: var(--panel, #fff); }
+.score-card.versus { border-color: var(--accent); }
+.score-card small { font-size: .65rem; font-weight: 700; color: var(--accent); letter-spacing: .03em; }
+.score-card a { display: flex; justify-content: space-between; gap: .8rem; text-decoration: none; color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.score-card a.win { color: inherit; font-weight: 800; }
+.score-card i { font-style: normal; font-weight: 500; font-size: .75rem; margin-left: .3rem; opacity: .7; }
