@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { appendRow, updateRow } from '../lib/api';
+import { appendRow, backupSheet, scanMilestones, downloadDataBackup, factoryReset, fetchSnapshot, updateRow } from '../lib/api';
 import { useLeague } from '../lib/league';
 import { STAGES, playerName, type Player, type Row, type Team } from '../lib/types';
 import { VIDEO_KINDS, draftVideoStory, videoType, youtubeId, type VideoKind, type VideoSubject } from '../lib/video';
@@ -307,6 +307,70 @@ function PublishVideo({ pw }: { pw: string }) {
   );
 }
 
+function Milestones({ pw }: { pw: string }) {
+  const { run, busy, view } = useSaver();
+  return (
+    <div className="stack">
+      <p className="small muted">
+        After you upload a week's stats, scan the Sheet for 3-game streaks (100-yard receiving or rushing games, 300-yard
+        passing games, sacks and more), career marks like 25 touchdowns, and big single games. New ones are logged on the
+        Moments tab and show up on player pages and in Twatter. Running it twice never logs the same one twice.
+      </p>
+      <div><button type="button" disabled={busy} onClick={() => void run(async () => {
+        const r = await scanMilestones(pw);
+        return r.added ? `Logged ${r.added} new: ${r.moments.slice(0, 5).join('; ')}${r.added > 5 ? '…' : ''}` : 'No new milestones.';
+      })}>{busy ? 'Scanning…' : 'Scan for milestones'}</button></div>
+      {view}
+    </div>
+  );
+}
+
+function BackupReset({ pw }: { pw: string }) {
+  const { run, busy, view } = useSaver();
+  const [confirm, setConfirm] = useState('');
+  return (
+    <div className="stack">
+      <p className="small muted">
+        <b>Back up:</b> saves a copy of every tab the site uses. <b>Factory reset:</b> wipes everything the league added
+        (games, stories, tweets, videos, moves, stat rows), puts Teams and Players back to the saved defaults, and sets all
+        head coaches back to CPU. It makes a backup first, in the Sheet and as a download.
+      </p>
+      <div className="row">
+        <button type="button" className="ghost" disabled={busy} onClick={() => void run(async () => `Downloaded ${await downloadDataBackup()}.`)}>
+          Download backup (.xlsx)
+        </button>
+        <button type="button" className="ghost" disabled={busy} onClick={() => void run(async () => {
+          const r = await backupSheet(pw);
+          return `Backed up ${r.tabs.length} tabs inside the Sheet (tabs named "BK ${r.stamp} ...").`;
+        })}>
+          Back up in the Sheet
+        </button>
+      </div>
+      <label>Type RESET to unlock the factory reset
+        <input value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="RESET" autoComplete="off" />
+      </label>
+      <div>
+        <button
+          type="button"
+          className="danger"
+          disabled={busy || confirm !== 'RESET'}
+          onClick={() => void run(async () => {
+            const file = await downloadDataBackup();
+            const snap = await fetchSnapshot();
+            const r = await factoryReset(pw, snap);
+            setConfirm('');
+            const rows = Object.values(r.clearedRows).reduce((a, b) => a + b, 0);
+            return `Reset done. Saved ${file}, backed up the Sheet as "BK ${r.backup.stamp}", cleared ${rows} cells of league data, restored defaults from ${String(r.snapshotTakenAt ?? 'the snapshot').slice(0, 10)}.`;
+          })}
+        >
+          {busy ? 'Working…' : 'Factory reset'}
+        </button>
+      </div>
+      {view}
+    </div>
+  );
+}
+
 export default function Admin() {
   const { admin, sample } = useLeague();
   const [pw, setPw] = useState('');
@@ -355,6 +419,8 @@ export default function Admin() {
         <section className="panel"><h2>Publish a story</h2><WriteArticle pw={p} /></section>
         <section className="panel"><h2>Post a video</h2><PublishVideo pw={p} /></section>
         <section className="panel"><h2>Head coaches</h2><SetCoach pw={p} /></section>
+        <section className="panel"><h2>Milestones</h2><Milestones pw={p} /></section>
+        <section className="panel"><h2>Backup &amp; reset</h2><BackupReset pw={p} /></section>
       </div>
     </>
   );

@@ -5,7 +5,7 @@ import { STAT_TABS, num, playerName, type Row } from '../lib/types';
 
 export default function PlayerPage() {
   const { id } = useParams();
-  const { players, teams, loadTab, season } = useLeague();
+  const { players, teams, loadTab, season, moments } = useLeague();
   const p = players.find((x) => x.PlayerID === id);
   const [stats, setStats] = useState<Record<string, Row | undefined> | null>(null);
 
@@ -46,6 +46,17 @@ export default function PlayerPage() {
           </div>
         ))}
       </div>
+      {moments.some((m) => m.PlayerID === id) && (
+        <section className="panel" style={{ marginBottom: '1rem' }}>
+          <h2>Milestones</h2>
+          {moments.filter((m) => m.PlayerID === id).reverse().map((m) => (
+            <p key={m.MomentID} className="small" style={{ margin: '.35rem 0' }}>
+              <span className="chip hot">{String(m.Type).replace(/_/g, ' ')}</span> {m.Detail}
+              <span className="muted"> · Season {String(m.Season)}, Week {String(m.Week)}</span>
+            </p>
+          ))}
+        </section>
+      )}
       <section className="panel">
         <h2>Season {season} stats</h2>
         {!stats && <p className="muted">Loading…</p>}

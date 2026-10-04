@@ -1,6 +1,6 @@
 import { hashString } from './rng';
 import type { TweetItem } from './stories';
-import { num, type Article } from './types';
+import { num, type Article, type Moment } from './types';
 
 /**
  * Weekly content lives in the Sheet's Articles tab, written after each batch of stats goes in.
@@ -47,4 +47,48 @@ export function curatedTweets(articles: Article[], season: number, week: number)
       scope: 'league' as const,
     };
   });
+}
+
+const MOMENT_LABEL: Record<string, string> = {
+  CAREER_MILESTONE: 'MILESTONE',
+  STREAK: 'STREAK ALERT',
+  FOUR_TD_GAME: 'FOUR-TD GAME',
+  BIG_RECEIVING_DAY: 'BIG DAY',
+  BIG_RUSHING_DAY: 'BIG DAY',
+  BIG_PASSING_DAY: 'BIG DAY',
+  BIG_SACK_DAY: 'BIG DAY',
+  MULTI_INT_GAME: 'BALLHAWK',
+  BIG_TACKLE_DAY: 'BIG DAY',
+  BIG_FUMBLE_DAY: 'BIG DAY',
+  PICK_SIX: 'PICK-SIX',
+  LONG_FG: 'LEG STRENGTH',
+  BIG_FG_DAY: 'KICKER WATCH',
+  LONG_PUNT: 'BOOM',
+  BIG_PUNT_DAY: 'PUNTER WATCH',
+};
+
+/** Milestones the Sheet logged on Moments for the week, as Twatter posts from the Milestone Watch account. */
+export function momentTweets(moments: Moment[], season: number, week: number): TweetItem[] {
+  return moments
+    .filter((m) => num(m.Season) === season && num(m.Week) === week && m.Detail && !/^EXAMPLE/i.test(String(m.MomentID)))
+    .map((m, i) => {
+      const h = hashString(String(m.MomentID));
+      const likes = 120 + (h % 1800);
+      return {
+        id: `m-${m.MomentID}`,
+        cat: 'milestone',
+        handle: 'MilestoneWatch',
+        name: 'Milestone Watch',
+        verified: true,
+        text: `${MOMENT_LABEL[String(m.Type)] ?? 'MILESTONE'}: ${m.Detail}.`,
+        minsAgo: 3 + i * 9 + (h % 5),
+        likes,
+        rts: Math.round(likes * (0.12 + ((h >> 3) % 15) / 100)),
+        replies: Math.round(likes * (0.04 + ((h >> 5) % 8) / 100)),
+        teams: m.Team ? [String(m.Team)] : [],
+        playerId: m.PlayerID ? String(m.PlayerID) : undefined,
+        badge: 'Leaker \u00b7 Milestones',
+        scope: 'league' as const,
+      };
+    });
 }

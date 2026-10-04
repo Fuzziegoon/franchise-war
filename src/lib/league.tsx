@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { fetchTabs, usingSampleData, verifyPassword } from './api';
-import type { Article, Game, Meta, Player, Row, Team } from './types';
+import type { Article, Game, Meta, Moment, Player, Row, Team } from './types';
 
-const CORE_TABS = ['Teams', 'Players', 'Games', 'Articles'];
+const CORE_TABS = ['Teams', 'Players', 'Games', 'Articles', 'Moments'];
 const PW_KEY = 'fw-admin-pw';
 
 interface LeagueState {
@@ -14,6 +14,7 @@ interface LeagueState {
   players: Player[];
   games: Game[];
   articles: Article[];
+  moments: Moment[];
   sample: boolean;
   reload: () => Promise<void>;
   /** Lazily loads extra tabs (stats, history) and caches them for the session. */
@@ -98,6 +99,7 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       players: (core.Players ?? []) as Player[],
       games: (core.Games ?? []) as Game[],
       articles: (core.Articles ?? []) as Article[],
+      moments: (core.Moments ?? []) as Moment[],
       sample: usingSampleData,
       reload,
       loadTab,

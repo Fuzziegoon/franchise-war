@@ -80,3 +80,14 @@ export const playerName = (p: Pick<Player, 'First Name' | 'Last Name'>) =>
   `${p['First Name']} ${p['Last Name']}`.trim();
 
 export const teamName = (t: Team) => `${t.City} ${t['Nickname (click)']}`;
+
+export interface Moment extends Row {
+  MomentID: string;
+  Season: number | string;
+  Week: number | string;
+  PlayerID: string;
+  Team: string;
+  Type: string;
+  Detail: string;
+  Value: number | string;
+}

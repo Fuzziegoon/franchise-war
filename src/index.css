@@ -187,3 +187,5 @@ button { border-radius: 4px; }
 .more { margin: 0 0 .6rem; font-size: .9rem; }
 .more a { text-decoration: none; font-weight: 700; }
 .more a:hover { color: var(--accent); }
+
+button.danger { background: var(--bad); color: #fff; }

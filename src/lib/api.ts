@@ -66,3 +66,39 @@ export const appendRow = (password: string, tab: string, values: Row) =>
 
 export const updateRow = (password: string, tab: string, key: string, values: Row) =>
   post<{ row: number; changed: string[] }>({ password, op: 'update', tab, key, values });
+
+export const BACKUP_TABS = ['Teams', 'Players', 'Games', 'Articles', 'Moments', 'Transactions', 'Records', 'Awards'];
+
+export interface BackupResult { stamp: string; tabs: string[] }
+export const backupSheet = (password: string) => post<BackupResult>({ password, op: 'backup' });
+
+export interface ResetResult {
+  backup: BackupResult;
+  clearedRows: Record<string, number>;
+  restoredColumns: Record<string, number>;
+  snapshotTakenAt: string | null;
+}
+
+/** The factory defaults shipped with the site (see scripts/make-snapshot.mjs). */
+export async function fetchSnapshot(): Promise<{ takenAt?: string; Teams: unknown; Players: unknown }> {
+  const res = await fetch(`./factory-snapshot.json?${Date.now()}`);
+  if (!res.ok) throw new Error('The factory snapshot file is missing from the site.');
+  return res.json();
+}
+
+export const factoryReset = (password: string, snapshot: unknown) =>
+  post<ResetResult>({ password, op: 'factoryReset', confirm: 'RESET', snapshot });
+
+/** Save everything the app can read as one JSON file in the browser. */
+export async function downloadDataBackup(): Promise<string> {
+  const { downloadXlsx, XLSX_BACKUP_TABS } = await import('./xlsxBackup');
+  const { tabs } = await fetchTabs(XLSX_BACKUP_TABS);
+  const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+  const name = `league-leak-backup-${stamp}.xlsx`;
+  await downloadXlsx(tabs, name);
+  return name;
+}
+
+export interface ScanResult { season: number; added: number; moments: string[] }
+/** Ask the Sheet to look for new streaks, career milestones and big games and log them on Moments. */
+export const scanMilestones = (password: string) => post<ScanResult>({ password, op: 'scanMilestones' });

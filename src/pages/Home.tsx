@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLeague } from '../lib/league';
-import { curatedTweets, isTweet, releasedWeeks } from '../lib/curated';
+import { curatedTweets, isTweet, momentTweets, releasedWeeks } from '../lib/curated';
 import { buildIndex, generateTweets, isPreviewWeek, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
 import { coachRecords, pct, recordText } from '../lib/standings';
 import { num, type Article } from '../lib/types';
@@ -21,7 +21,7 @@ const compact = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0
 type Filter = 'all' | 'coach' | 'league';
 
 export default function Home() {
-  const { articles, games, teams, players, season, loading } = useLeague();
+  const { articles, games, teams, players, season, loading, moments } = useLeague();
 
   const weeks = useMemo(() => releasedWeeks(articles, season), [articles, season]);
   const [picked, setPicked] = useState<number | null>(null);
@@ -39,7 +39,7 @@ export default function Home() {
   const idx = useMemo(() => buildIndex(data), [data]);
   const news = useMemo(() => weekNews(data, idx), [data, idx]);
   const tweets = useMemo(() => {
-    const base = [...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26, { filler: isPreviewWeek(week) })];
+    const base = [...momentTweets(moments, season, week), ...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26, { filler: isPreviewWeek(week) })];
     const v = videos[0];
     if (!v) return base;
     const vt: TweetItem = {
@@ -48,7 +48,7 @@ export default function Home() {
     };
     return [vt, ...base];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, idx, videos[0]?.ArticleID, articles, season, week]);
+  }, [data, idx, videos[0]?.ArticleID, articles, season, week, moments]);
 
   const coaches = coachRecords(games);
   const humanTeams = teams.filter((t) => t['Head Coach'] && String(t['Head Coach']).toUpperCase() !== 'CPU');

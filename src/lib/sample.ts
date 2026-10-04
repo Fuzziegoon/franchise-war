@@ -749,4 +749,8 @@ export const sampleArticles = [
 "Published": "2026-10-04"
 }
 ] as unknown as Article[];
-export const sampleTabs: Record<string, Row[]> = { Teams: sampleTeams, Players: samplePlayers, Games: sampleGames, Articles: sampleArticles };
+export const sampleMoments = [
+{ "MomentID": "SAMPLE-M1", "Season": 1, "Week": 2, "PlayerID": "P0060", "Team": "CIN", "Type": "STREAK",
+  "Detail": "Ja'Marr Chase has posted at least 100 receiving yards in 3 straight games (Week 0 to Week 2)", "Value": 3 },
+] as unknown as Row[];
+export const sampleTabs: Record<string, Row[]> = { Teams: sampleTeams, Players: samplePlayers, Games: sampleGames, Articles: sampleArticles, Moments: sampleMoments };
