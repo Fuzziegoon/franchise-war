@@ -1,37 +1,22 @@
+/* The League Leak: clean, sports-network look. Light page, dark header, one red accent. */
 :root {
-  --bg: #f4f5f7;
+  --bg: #eceef0;
   --panel: #ffffff;
-  --ink: #12161c;
-  --muted: #5d6673;
-  --line: #dfe3e8;
-  --accent: #c8102e;
+  --ink: #121212;
+  --muted: #6b7075;
+  --line: #e2e4e7;
+  --accent: #d00a1b;
   --accent-ink: #ffffff;
-  --afc: #c8102e;
-  --nfc: #013369;
+  --afc: #d00a1b;
+  --nfc: #0b3d91;
   --good: #1a7f37;
-  --bad: #b42318;
-  --chip: #eef1f4;
+  --bad: #c1121f;
+  --chip: #f0f1f3;
+  --bar: #121212;
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--ink);
   background: var(--bg);
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1117;
-    --panel: #161b22;
-    --ink: #e8edf2;
-    --muted: #9aa5b1;
-    --line: #2a313b;
-    --accent: #ff4d5e;
-    --accent-ink: #0d1117;
-    --afc: #ff6b7a;
-    --nfc: #6ea8ff;
-    --good: #3fb950;
-    --bad: #f85149;
-    --chip: #21262d;
-    color-scheme: dark;
-  }
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); }
@@ -52,7 +37,6 @@ h3 { font-size: 1rem; }
 
 main { max-width: 1100px; margin: 0 auto; padding: 1.25rem 16px 3rem; }
 .banner { background: #fff4d6; color: #5c4400; border: 1px solid #f0d58a; padding: .6rem .8rem; border-radius: 8px; margin-bottom: 1rem; font-size: .9rem; }
-@media (prefers-color-scheme: dark) { .banner { background: #2d2410; color: #f0d58a; border-color: #5c4400; } }
 .error { color: var(--bad); }
 
 .grid { display: grid; gap: 1rem; }
@@ -107,3 +91,72 @@ button:disabled { opacity: .5; cursor: default; }
   .nav { order: 3; flex: 0 0 100%; flex-wrap: nowrap; overflow-x: auto; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* News & Twatter */
+.page-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.week-pick { width: 150px; }
+.war { margin-bottom: 1rem; }
+.split { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 800px) { .split { grid-template-columns: 1fr; } }
+.subjects { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .4rem; }
+.subjects a { text-decoration: none; }
+.feed-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .25rem; }
+.feed-head h2 { margin: 0; }
+.chips { display: flex; gap: .3rem; flex-wrap: wrap; }
+.chip-btn { background: var(--chip); color: var(--ink); padding: .25rem .65rem; font-size: .8rem; border-radius: 999px; }
+.chip-btn.on { background: var(--accent); color: var(--accent-ink); }
+.tweet { display: flex; gap: .65rem; padding: .7rem 0; border-bottom: 1px solid var(--line); }
+.tweet:last-child { border-bottom: 0; }
+.avatar { flex: 0 0 38px; height: 38px; border-radius: 50%; color: #fff; font-weight: 800; display: grid; place-items: center; }
+.tweet-body { min-width: 0; }
+.tweet-top { font-size: .88rem; overflow-wrap: anywhere; }
+.tweet-text { margin-top: .15rem; overflow-wrap: anywhere; }
+.tweet-meta { display: flex; gap: .9rem; flex-wrap: wrap; margin-top: .35rem; }
+.tweet-meta a.tag { text-decoration: none; color: var(--nfc); }
+.check { background: #1d9bf0; color: #fff; border-radius: 50%; font-size: .6rem; width: 15px; height: 15px; display: inline-grid; place-items: center; margin-left: 4px; vertical-align: 1px; }
+.disclaimer { margin-top: 1.25rem; }
+
+/* ---- League Leak theme ---- */
+.topbar { background: var(--bar); border-bottom: 3px solid var(--accent); color: #fff; }
+.topbar-inner { max-width: 1180px; padding: .5rem 16px; }
+.brand { font-weight: 900; font-size: 1.15rem; letter-spacing: .04em; color: #fff; text-transform: uppercase; }
+.brand b { color: #fff; background: var(--accent); padding: 0 .35rem; margin-left: .2rem; border-radius: 2px; }
+.nav a { color: #b9bdc2; text-transform: uppercase; letter-spacing: .04em; font-size: .8rem; font-weight: 700; border-radius: 0; padding: .55rem .7rem; }
+.nav a.active, .nav a:hover { color: #fff; background: transparent; box-shadow: inset 0 -3px 0 var(--accent); }
+.season-pill { color: #b9bdc2; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+main { max-width: 1180px; }
+.panel { border-radius: 6px; border: 0; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+.panel > h2, .feed-head h2, .hero-side h2 { font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 800; padding-left: .55rem; border-left: 4px solid var(--accent); }
+h1 { font-weight: 900; letter-spacing: -.01em; }
+.chip { border-radius: 3px; text-transform: uppercase; letter-spacing: .04em; font-size: .65rem; font-weight: 800; color: #444; }
+.chip.hot { background: var(--accent); color: #fff; }
+button { border-radius: 4px; }
+.chip-btn { border-radius: 999px; text-transform: none; }
+.article h3 { font-size: 1.1rem; font-weight: 800; }
+.article h3:hover { color: var(--accent); }
+.match { display: block; width: 100%; text-align: left; margin-top: .25rem; }
+
+/* scoreboard strip */
+.ticker { background: #fff; border-bottom: 1px solid var(--line); }
+.ticker-inner { max-width: 1180px; margin: 0 auto; display: flex; overflow-x: auto; scrollbar-width: thin; }
+.ticker-label { flex: 0 0 auto; display: grid; place-content: center; padding: .4rem 1.1rem; font-weight: 900; border-right: 1px solid var(--line); }
+.ticker-label small { color: var(--muted); font-weight: 600; }
+.ticker-game { flex: 0 0 auto; min-width: 118px; padding: .45rem .9rem; border-right: 1px solid var(--line); display: grid; gap: .1rem; }
+.ticker-game small { font-size: .65rem; font-weight: 700; color: var(--accent); }
+.ticker-game a { display: flex; justify-content: space-between; gap: 1rem; text-decoration: none; color: var(--muted); font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ticker-game a.win { color: var(--ink); font-weight: 800; }
+
+/* video hero */
+.hero { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1rem; margin-bottom: 1rem; background: #fff; border-radius: 6px; padding: 1rem; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+@media (max-width: 800px) { .hero { grid-template-columns: 1fr; } }
+.player { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 4px; overflow: hidden; }
+.player iframe, .thumb { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.thumb { background-size: cover; background-position: center; border-radius: 0; padding: 0; }
+.playbtn { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 68px; height: 68px; border-radius: 50%; background: rgba(208, 10, 27, .92); color: #fff; font-size: 1.6rem; display: grid; place-items: center; padding-left: 5px; }
+.hero-title { font-size: 1.5rem; font-weight: 900; margin-top: .25rem; }
+.hero-main p { margin: 0; }
+.hero-side { display: grid; align-content: start; gap: .7rem; }
+.vrow { display: grid; grid-template-columns: 112px 1fr; gap: .7rem; text-decoration: none; align-items: start; font-size: .85rem; }
+.vrow:hover b { color: var(--accent); }
+.vthumb { position: relative; aspect-ratio: 16 / 9; background: #222 center / cover; border-radius: 3px; display: block; }
+.vthumb i { position: absolute; right: 4px; bottom: 4px; background: rgba(0, 0, 0, .75); color: #fff; font-size: .6rem; font-style: normal; padding: 1px 5px; border-radius: 2px; }

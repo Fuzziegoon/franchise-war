@@ -718,9 +718,21 @@ export const sampleArticles = [
 "Week": 2,
 "Type": "Recap",
 "Subjects": "CIN; CHI; Wes; Christian",
-"Headline": "Burrow outduels Williams as Christian takes the first Franchise War meeting",
+"Headline": "Burrow outduels Williams as Christian takes the first coach-war meeting",
 "Summary": "Sample article. Real stories appear here once the app is connected to the league Sheet and an admin publishes them.",
 "Key facts used": "31-28 final",
+"Status": "Published",
+"Published": "2026-10-04"
+},
+{
+"ArticleID": "SAMPLE-V1",
+"Season": 1,
+"Week": 2,
+"Type": "Video: Top 5 Plays",
+"Subjects": "",
+"Headline": "Top 5 plays of Week 2",
+"Summary": "Sample video. We counted down the five best plays from around the league. Number one is a lot to take in.\nhttps://youtu.be/dQw4w9WgXcQ",
+"Key facts used": "",
 "Status": "Published",
 "Published": "2026-10-04"
 }

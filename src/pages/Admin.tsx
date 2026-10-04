@@ -1,7 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { appendRow, updateRow } from '../lib/api';
 import { useLeague } from '../lib/league';
-import { STAGES, playerName, type Row, type Team } from '../lib/types';
+import { STAGES, playerName, type Player, type Row, type Team } from '../lib/types';
+import { VIDEO_KINDS, draftVideoStory, videoType, youtubeId, type VideoKind, type VideoSubject } from '../lib/video';
 
 type Status = { kind: 'idle' | 'busy' | 'ok' | 'err'; msg?: string };
 
@@ -216,6 +217,96 @@ function WriteArticle({ pw }: { pw: string }) {
   );
 }
 
+
+function PublishVideo({ pw }: { pw: string }) {
+  const { season, teams, players } = useLeague();
+  const { run, busy, view } = useSaver();
+  const [url, setUrl] = useState('');
+  const [kind, setKind] = useState<VideoKind>('Game Highlights');
+  const [week, setWeek] = useState(1);
+  const [subj, setSubj] = useState<'none' | 'team' | 'player' | 'coach'>('none');
+  const [teamAbbr, setTeamAbbr] = useState('');
+  const [coach, setCoach] = useState('');
+  const [query, setQuery] = useState('');
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [variant, setVariant] = useState(0);
+  const [edit, setEdit] = useState<{ h: string; b: string } | null>(null);
+
+  const coaches = Array.from(new Set(teams.map((t) => String(t['Head Coach'] ?? '')).filter((c) => c && c.toUpperCase() !== 'CPU')));
+  const matches = query.length >= 2 ? players.filter((p) => playerName(p).toLowerCase().includes(query.toLowerCase())).slice(0, 6) : [];
+  const teamBy = (abbr: string) => teams.find((t) => t.Abbr === abbr);
+
+  const subject: VideoSubject = {};
+  const team = teamBy(teamAbbr);
+  if (subj === 'team' && team) subject.team = { name: team.Abbr, city: String(team.City), nick: String(team['Nickname (click)']) };
+  if (subj === 'coach' && coach) subject.coach = coach;
+  if (subj === 'player' && player) {
+    const pt = teams.find((t) => String(t['TeamIndex (save ID)']) === String(player.TeamIndex));
+    subject.player = {
+      name: playerName(player), first: String(player['First Name']), last: String(player['Last Name']),
+      team: pt?.Abbr ?? '', teamCity: String(pt?.City ?? ''), teamNick: String(pt?.['Nickname (click)'] ?? 'team'),
+    };
+  }
+  const draft = draftVideoStory(kind, subject, week, season, variant);
+  const text = edit ?? { h: draft.headline, b: draft.blurb };
+  const id = youtubeId(url);
+  const subjects = [subject.team?.name, subject.player?.team, player?.PlayerID, subject.coach].filter(Boolean).join(';');
+
+  return (
+    <form
+      className="stack"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!id) return;
+        void run(async () => {
+          const r = await appendRow(pw, 'Articles', {
+            Season: season, Week: week, Type: videoType(kind), Subjects: subjects, Headline: text.h,
+            Summary: `${text.b}\nhttps://youtu.be/${id}`, 'Key facts used': '', Status: 'Published',
+            Published: new Date().toISOString().slice(0, 10),
+          });
+          setUrl(''); setEdit(null); setVariant(0);
+          return `Posted video ${r.id}. It will show on the home page.`;
+        });
+      }}
+    >
+      <label>YouTube link<input required placeholder="https://youtu.be/..." value={url} onChange={(e) => setUrl(e.target.value)} /></label>
+      {url && !id && <p className="error small">That doesn't look like a YouTube link.</p>}
+      <div className="row">
+        <label>Kind<select value={kind} onChange={(e) => { setKind(e.target.value as VideoKind); setEdit(null); }}>{VIDEO_KINDS.map((k) => <option key={k}>{k}</option>)}</select></label>
+        <label>Week<input type="number" min={0} value={week} onChange={(e) => { setWeek(Number(e.target.value)); setEdit(null); }} /></label>
+        <label>Featuring
+          <select value={subj} onChange={(e) => { setSubj(e.target.value as typeof subj); setEdit(null); }}>
+            <option value="none">Whole league</option><option value="team">A team</option><option value="player">A player</option><option value="coach">A coach</option>
+          </select>
+        </label>
+      </div>
+      {subj === 'team' && (
+        <label>Team<select value={teamAbbr} onChange={(e) => { setTeamAbbr(e.target.value); setEdit(null); }}>
+          <option value="">Pick…</option>{teams.map((t) => <option key={t.Abbr} value={t.Abbr}>{t.City} {t['Nickname (click)']}</option>)}
+        </select></label>
+      )}
+      {subj === 'coach' && (
+        <label>Coach<select value={coach} onChange={(e) => { setCoach(e.target.value); setEdit(null); }}>
+          <option value="">Pick…</option>{coaches.map((c) => <option key={c}>{c}</option>)}
+        </select></label>
+      )}
+      {subj === 'player' && (
+        <div>
+          <label>Player (type a name)<input value={player ? playerName(player) : query} onChange={(e) => { setPlayer(null); setQuery(e.target.value); setEdit(null); }} /></label>
+          {!player && matches.map((p) => <button type="button" className="ghost match" key={p.PlayerID} onClick={() => setPlayer(p)}>{playerName(p)} · {p.Position} · {p.Team}</button>)}
+        </div>
+      )}
+      <label>Headline<input required value={text.h} onChange={(e) => setEdit({ ...text, h: e.target.value })} /></label>
+      <label>Blurb<textarea required value={text.b} onChange={(e) => setEdit({ ...text, b: e.target.value })} /></label>
+      <div className="row">
+        <button type="button" className="ghost" onClick={() => { setVariant(variant + 1); setEdit(null); }}>Write me another</button>
+        <button disabled={busy || !id}>{busy ? 'Posting…' : 'Post video'}</button>
+      </div>
+      {view}
+    </form>
+  );
+}
+
 export default function Admin() {
   const { admin, sample } = useLeague();
   const [pw, setPw] = useState('');
@@ -262,6 +353,7 @@ export default function Admin() {
         <section className="panel"><h2>Log a game</h2><LogGame pw={p} /></section>
         <section className="panel"><h2>Log a move</h2><LogMove pw={p} /></section>
         <section className="panel"><h2>Publish a story</h2><WriteArticle pw={p} /></section>
+        <section className="panel"><h2>Post a video</h2><PublishVideo pw={p} /></section>
         <section className="panel"><h2>Head coaches</h2><SetCoach pw={p} /></section>
       </div>
     </>

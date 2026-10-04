@@ -1,4 +1,4 @@
-# Madden 27 Franchise War Tracker
+# The League Leak (Madden 27 league tracker)
 
 Web app for the Franchise War series (coaches Wes and Christian, room for 16 coaches and 100 seasons).
 The league Google Sheet **Madden27_Baseline_Database** is the database; this app reads it and lets
