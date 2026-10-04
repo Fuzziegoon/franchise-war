@@ -1,7 +1,8 @@
 import { makeRng, type Rng } from './rng';
+import { G_CONTEXT, G_OUTLOOK, L_CONTEXT, L_OUTLOOK, P_CONTEXT, P_OUTLOOK, T_CONTEXT, T_OUTLOOK, type Para } from './articleData';
 import { computeRecords, isFinal, type TeamRecord } from './standings';
 import {
-  ACCOUNTS, HIGHLIGHTS, NEWS, OUTLETS, RECAPS, REPORTERS, TWEETS,
+  ACCOUNTS, HIGHLIGHTS, HUMANS, LEAKERS, NEWS, OUTLETS, RECAPS, REPORTERS, TWEETS,
   type Account, type NewsTpl, type TweetTpl, type Who,
 } from './storyData';
 import { num, playerName, type Game, type Player, type Team } from './types';
@@ -39,6 +40,10 @@ export interface TweetItem {
   replies: number;
   teams: string[];
   playerId?: string;
+  /** Hate mail is addressed to a player. */
+  replyTo?: string;
+  /** Label for Leaker accounts. */
+  badge?: string;
   /** coach = involves a human coach's team; highlight = around-the-league game result */
   scope: 'coach' | 'league' | 'highlight';
 }
@@ -425,6 +430,8 @@ function pickAccount(cat: string, teamAbbr: string | undefined, idx: Index, rng:
     const t = idx.teams.get(abbr)!.team;
     return { handle: `${String(t['Nickname (click)']).replace(/\W/g, '')}Beat`, name: `${t.City} Beat`, kind: 'insider', verified: true };
   };
+  if (LEAKERS[cat]) return LEAKERS[cat];
+  if (cat === 'hatemail' || cat === 'hottake') return rng.pick(HUMANS);
   if (INSIDER_CATS.has(cat)) return rng.pick(ACCOUNTS.filter((a) => a.kind === 'insider'));
   if (FAN_CATS.has(cat)) return rng.pick(ACCOUNTS.filter((a) => a.kind === 'fan' || a.kind === 'comic'));
   if (cat === 'highlight') return rng.pick(ACCOUNTS.filter((a) => a.kind === 'stats' || a.kind === 'insider'));
@@ -484,7 +491,9 @@ export function generateTweets(d: LeagueData, idx: Index, count = 24): TweetItem
       verified: !!acct.verified,
       text: fill(t.t, slots),
       minsAgo: 0,
-      ...engagement(rng, acct, boost),
+      ...engagement(rng, acct, boost * (acct.kind === 'leaker' ? 3 : 1)),
+      badge: acct.badge,
+      replyTo: t.cat === 'hatemail' && playerId ? String(slots.p) : undefined,
       teams,
       playerId,
       scope: isCoach ? 'coach' : 'league',
@@ -541,4 +550,120 @@ export function generateTweets(d: LeagueData, idx: Index, count = 24): TweetItem
     t.minsAgo = mins;
   }
   return merged;
+}
+
+
+// ------------------------------------------------------------------ full articles
+
+/** The news column for a week: coach recaps first, then generated stories. Home and the article page both use this. */
+export function weekNews(d: LeagueData, idx: Index): NewsItem[] {
+  return [...generateRecaps(d, idx), ...generateNews(d, idx, 8)];
+}
+
+export interface Article2 {
+  paragraphs: string[];
+  facts: [string, string][];
+  leaker: { name: string; handle: string; badge?: string; text: string } | null;
+}
+
+const ordinalRank = (i: number) => (i === 0 ? 'the best player' : i === 1 ? 'the second-best player' : i === 2 ? 'the third-best player' : `the #${i + 1} player`);
+
+const formLine = (tc: TeamCtx) => {
+  const r = tc.rec;
+  const rec = `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+  if (r.w + r.l + r.t === 0) return `The ${tc.team['Nickname (click)']} have yet to play, so the story is still being written.`;
+  const st = r.streak;
+  const run = st && Number(st.slice(1)) >= 2 ? (st[0] === 'W' ? ` and have won ${st.slice(1)} straight` : ` and have dropped ${st.slice(1)} in a row`) : '';
+  return `The ${tc.team['Nickname (click)']} are ${rec}${run}.`;
+};
+
+const eligible = (list: Para[], tags: Set<string>) => list.filter((p) => hasAll(tags, p.need));
+
+function assemble(rng: Rng, tags: Set<string>, ctx: Para[], outlook: Para[], slots: Slots, ctxCount: number): string[] {
+  const out: string[] = [];
+  const first = ctx.find((p) => p.need === 'any');
+  const pool = rng.shuffle(eligible(ctx, tags).filter((p) => p !== first));
+  if (first) out.push(fill(first.t, slots));
+  for (const p of pool.slice(0, ctxCount)) out.push(fill(p.t, slots));
+  const o = eligible(outlook, tags);
+  if (o.length) out.push(fill(rng.pick(o).t, slots));
+  return out;
+}
+
+export function composeArticle(item: NewsItem, d: LeagueData, idx: Index): Article2 {
+  const rng = makeRng(`article|${item.id}`);
+  const wkSlots = { wk: d.week, season: d.season };
+  let paragraphs: string[] = [item.body];
+  const facts: [string, string][] = [];
+  let leakerKind: Who = 'L';
+  let tags = new Set<string>(['any']);
+  let slots: Slots = { ...wkSlots };
+
+  const player = item.playerId ? d.players.find((p) => p.PlayerID === item.playerId) : undefined;
+  const tc = item.teams[0] ? idx.teams.get(item.teams[0]) : undefined;
+
+  if (item.id.startsWith('r-')) {
+    const gc = gamesForWeek(d, idx).find((g) => `r-${g.g.GameID}` === item.id);
+    if (gc) {
+      const rec = (t: TeamCtx) => `${t.rec.w}-${t.rec.l}${t.rec.t ? `-${t.rec.t}` : ''}`;
+      slots = { ...gameSlots(gc, d, idx, rng), wrec: rec(gc.w), lrec: rec(gc.l) };
+      tags = gc.tags;
+      paragraphs = [item.body, ...assemble(rng, tags, G_CONTEXT, G_OUTLOOK, slots, 3)];
+      facts.push(['Final', `${slots.wc} ${slots.ws}, ${slots.lc} ${slots.ls}`], ['Margin', String(slots.margin)], ['Week', String(d.week)]);
+      if (gc.h2h) facts.push(['Coaches', `${gc.w.coach} def. ${gc.l.coach}`]);
+    }
+    leakerKind = 'L';
+  } else if (player && tc) {
+    const rank = Math.max(0, tc.roster.findIndex((m) => m.PlayerID === player.PlayerID));
+    slots = { ...playerSlots(player, tc, idx, rng), ...wkSlots, rank: ordinalRank(rank), form: formLine(tc) };
+    tags = new Set(idx.playerTags.get(player.PlayerID) ?? ['any']);
+    if (tc.roster.filter((m) => m.PlayerID !== player.PlayerID && (num(m.Overall) ?? 0) >= 75).length) tags.add('mate');
+    const ol = P_OUTLOOK[item.cat] ?? P_OUTLOOK.default;
+    paragraphs = [item.body, ...assemble(rng, tags, P_CONTEXT, ol, slots, 3)];
+    facts.push(['Player', playerName(player)], ['Position', String(player.Position)], ['Age', String(player.Age)], ['Overall', String(player.Overall)], ['Team', tc.abbr]);
+    if (player['Injury Status'] && player['Injury Status'] !== 'Uninjured') facts.push(['Injury', slots.inj as string]);
+    leakerKind = 'P';
+  } else if (tc) {
+    slots = { ...teamSlots(tc, idx), ...wkSlots, form: formLine(tc) };
+    tags = tc.tags;
+    paragraphs = [item.body, ...assemble(rng, tags, T_CONTEXT, T_OUTLOOK, slots, 3)];
+    facts.push(['Team', `${tc.team.City} ${tc.team['Nickname (click)']}`], ['Record', slots.rec as string]);
+    if (tc.coach) facts.push(['Head coach', tc.coach]);
+    leakerKind = 'T';
+  } else {
+    const all = [...idx.teams.values()];
+    const played = all.filter((t) => t.rec.w + t.rec.l > 0);
+    const top = [...played].sort((a, b) => b.rec.w - a.rec.w || a.rec.l - b.rec.l)[0];
+    const cold = [...played].sort((a, b) => b.rec.l - a.rec.l || a.rec.w - b.rec.w)[0];
+    const best = d.players.filter((p) => p.Status === 'Signed').sort((a, b) => (num(b.Overall) ?? 0) - (num(a.Overall) ?? 0))[0];
+    const bestTeam = best ? idx.teams.get(String(best.Team)) : undefined;
+    const rival = idx.coachTeams.length > 1
+      ? `The coach rivalry is still the series\u2019 main event, with ${idx.coachTeams[0].coach} and ${idx.coachTeams[1].coach} each wanting the last word.`
+      : 'The league is wide open, and nobody has a lock on anything.';
+    const r = (t?: TeamCtx) => (t ? `${t.rec.w}-${t.rec.l}` : '0-0');
+    slots = {
+      ...wkSlots,
+      topt: top ? String(top.team['Nickname (click)']) : 'the leaders',
+      topr: r(top),
+      coldt: cold ? String(cold.team['Nickname (click)']) : 'the strugglers',
+      coldr: r(cold),
+      starp: best ? playerName(best) : 'the best player',
+      startm: bestTeam ? String(bestTeam.team['Nickname (click)']) : 'league',
+      starovr: best ? String(best.Overall) : '99',
+      rivalry: rival,
+    };
+    paragraphs = [item.body, ...assemble(rng, tags, L_CONTEXT, L_OUTLOOK, slots, 2)];
+    facts.push(['Season', String(d.season)], ['Week', String(d.week)]);
+    leakerKind = 'L';
+  }
+
+  // closing take from a Leaker, matched to the story subject
+  const picks = TWEETS.filter((t) => LEAKERS[t.cat] && t.who === leakerKind && hasAll(tags, t.need) && inWeek(t.wk, d.week));
+  let leaker: Article2['leaker'] = null;
+  if (picks.length) {
+    const t = rng.pick(picks);
+    const a = LEAKERS[t.cat];
+    leaker = { name: a.name, handle: a.handle, badge: a.badge, text: fill(t.t, slots) };
+  }
+  return { paragraphs, facts, leaker };
 }

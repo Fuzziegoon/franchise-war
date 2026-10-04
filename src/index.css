@@ -160,3 +160,30 @@ button { border-radius: 4px; }
 .vrow:hover b { color: var(--accent); }
 .vthumb { position: relative; aspect-ratio: 16 / 9; background: #222 center / cover; border-radius: 3px; display: block; }
 .vthumb i { position: absolute; right: 4px; bottom: 4px; background: rgba(0, 0, 0, .75); color: #fff; font-size: .6rem; font-style: normal; padding: 1px 5px; border-radius: 2px; }
+
+/* articles + Leakers */
+.article h3 a { text-decoration: none; }
+.article h3 a:hover { color: var(--accent); }
+.leaker-badge { display: inline-block; background: #121212; color: #fff; font-size: .6rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 1px 6px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; }
+.mention { color: var(--nfc); font-weight: 600; }
+.story { max-width: 1000px; margin: 0 auto; }
+.back { text-decoration: none; color: var(--muted); font-weight: 600; }
+.kicker { margin-top: .8rem; }
+.story-title { font-size: 2.1rem; font-weight: 900; line-height: 1.12; margin: .35rem 0 .4rem; }
+.byline { margin-bottom: 1.2rem; }
+.story-grid { display: grid; gap: 1.2rem; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; }
+@media (max-width: 800px) { .story-grid { grid-template-columns: 1fr; } .story-title { font-size: 1.6rem; } }
+.story-body { background: var(--panel); border-radius: 6px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 2px rgba(0,0,0,.08); font-size: 1.05rem; line-height: 1.65; }
+.story-body.single { max-width: 720px; }
+.story-body p { margin: 0 0 1rem; }
+.story-body p.lede { font-size: 1.2rem; font-weight: 600; }
+.leaker-take { border-left: 4px solid var(--accent); background: var(--chip); padding: .8rem 1rem; margin: 1.2rem 0; border-radius: 0 4px 4px 0; }
+.leaker-take p { margin: .35rem 0; font-size: 1rem; font-weight: 600; }
+.story-side { display: grid; gap: 1rem; }
+.facts { margin: 0; display: grid; gap: .4rem; }
+.facts div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); padding-bottom: .3rem; font-size: .9rem; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-weight: 700; text-align: right; }
+.more { margin: 0 0 .6rem; font-size: .9rem; }
+.more a { text-decoration: none; font-weight: 700; }
+.more a:hover { color: var(--accent); }

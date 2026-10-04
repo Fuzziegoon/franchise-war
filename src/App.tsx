@@ -7,6 +7,7 @@ import TeamPage from './pages/TeamPage';
 import PlayerPage from './pages/PlayerPage';
 import Leaders from './pages/Leaders';
 import Admin from './pages/Admin';
+import { StoryPage, WrittenPage } from './pages/ArticlePage';
 import Ticker from './components/Ticker';
 
 export default function App() {
@@ -49,6 +50,8 @@ export default function App() {
         ) : (
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/story/:season/:week/:id" element={<StoryPage />} />
+            <Route path="/article/:id" element={<WrittenPage />} />
             <Route path="/standings" element={<Standings />} />
             <Route path="/teams" element={<Teams />} />
             <Route path="/team/:abbr" element={<TeamPage />} />

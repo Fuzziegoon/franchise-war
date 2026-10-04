@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLeague } from '../lib/league';
-import { buildIndex, generateNews, generateRecaps, generateTweets, type NewsItem, type TweetItem } from '../lib/stories';
+import { buildIndex, generateTweets, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
 import { coachRecords, pct, recordText } from '../lib/standings';
 import { num, type Article } from '../lib/types';
 import { embedUrl, isVideo, thumbUrl, videoBlurb, videoIdOf, videoKindOf } from '../lib/video';
@@ -39,8 +39,7 @@ export default function Home() {
 
   const data = useMemo(() => ({ teams, players, games, season, week }), [teams, players, games, season, week]);
   const idx = useMemo(() => buildIndex(data), [data]);
-  const recaps = useMemo(() => generateRecaps(data, idx), [data, idx]);
-  const news = useMemo(() => [...recaps, ...generateNews(data, idx, 8)], [data, idx, recaps]);
+  const news = useMemo(() => weekNews(data, idx), [data, idx]);
   const tweets = useMemo(() => {
     const base = generateTweets(data, idx, 26);
     const v = videos[0];
@@ -112,7 +111,7 @@ export default function Home() {
             <h2>League News <span className="small muted">{weekLabel(week)}</span></h2>
             {written.map((a) => <WrittenCard key={a.ArticleID} a={a} />)}
             {news.length === 0 && written.length === 0 && <p className="muted small">No stories yet for this week.</p>}
-            {news.map((n) => <NewsCard key={n.id} n={n} />)}
+            {news.map((n) => <NewsCard key={n.id} n={n} season={season} week={week} />)}
           </section>
 
           <section className="panel feed">
@@ -146,14 +145,14 @@ function Subjects({ teams, playerId }: { teams: string[]; playerId?: string }) {
   );
 }
 
-function NewsCard({ n }: { n: NewsItem }) {
+function NewsCard({ n, season, week }: { n: NewsItem; season: number; week: number }) {
   return (
     <article className="article">
       <div className="small muted">
         <span className="chip">{n.cat}</span> {n.outlet} · {n.reporter}
         {n.coachStory && <span className="chip coach" style={{ marginLeft: 6 }}>Coach team</span>}
       </div>
-      <h3>{n.headline}</h3>
+      <h3><Link to={`/story/${season}/${week}/${n.id}`}>{n.headline}</Link></h3>
       <p className="small">{n.body}</p>
       <Subjects teams={n.teams} playerId={n.playerId} />
     </article>
@@ -161,11 +160,12 @@ function NewsCard({ n }: { n: NewsItem }) {
 }
 
 function WrittenCard({ a }: { a: Article }) {
+  const ref = `/article/${a.ArticleID}`;
   return (
     <article className="article">
       <div className="small muted"><span className="chip">{a.Type}</span> League Desk</div>
-      <h3>{a.Headline}</h3>
-      <p className="small">{a.Summary}</p>
+      <h3><Link to={ref}>{a.Headline}</Link></h3>
+      <p className="small">{String(a.Summary).split(/\n\s*\n/)[0]}</p>
     </article>
   );
 }
@@ -178,8 +178,10 @@ function Tweet({ t }: { t: TweetItem }) {
         <div className="tweet-top">
           <b>{t.name}</b>
           {t.verified && <span className="check" title="Verified (fictional)">✓</span>}
+          {t.badge && <span className="leaker-badge">{t.badge}</span>}
           <span className="muted"> @{t.handle} · {ago(t.minsAgo)}</span>
         </div>
+        {t.replyTo && <div className="small muted">Replying to <span className="mention">{t.replyTo}</span></div>}
         <div className="tweet-text">{t.text}</div>
         <div className="tweet-meta small muted">
           <span>💬 {compact(t.replies)}</span>

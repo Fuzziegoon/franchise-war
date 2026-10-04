@@ -73,3 +73,33 @@ describe('generators', () => {
     expect(generateRecaps(data(15), buildIndex(data(15)))).toEqual([]);
   });
 });
+
+import { composeArticle, weekNews } from './stories';
+import { LEAKERS } from './storyData';
+
+describe('articles', () => {
+  it('compose full, fully-filled articles for every story of several weeks', () => {
+    for (const wk of [0, 1, 2, 5, 12]) {
+      const d = data(wk);
+      const idx = buildIndex(d);
+      for (const n of weekNews(d, idx)) {
+        const a = composeArticle(n, d, idx);
+        expect(a.paragraphs.length).toBeGreaterThanOrEqual(3);
+        expect(a.paragraphs.join(' ') + (a.leaker?.text ?? '') + a.facts.join(' ')).not.toMatch(/[{}]|undefined|NaN/);
+        expect(new Set(a.paragraphs).size).toBe(a.paragraphs.length);
+      }
+    }
+  });
+  it('gives hate mail a recipient and Leakers a badge', () => {
+    let hate = 0, leak = 0;
+    for (const wk of [0, 1, 2, 3, 4, 5, 6, 7, 8]) {
+      const d = data(wk);
+      for (const t of generateTweets(d, buildIndex(d), 60)) {
+        if (t.cat === 'hatemail') { hate++; expect(t.replyTo).toBeTruthy(); }
+        if (LEAKERS[t.cat]) { leak++; expect(t.badge).toBeTruthy(); }
+      }
+    }
+    expect(hate).toBeGreaterThan(0);
+    expect(leak).toBeGreaterThan(0);
+  });
+});

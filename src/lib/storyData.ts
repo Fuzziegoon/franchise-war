@@ -397,6 +397,112 @@ export const TWEETS: TweetTpl[] = [
   W('rumor', 'L', 'any', 'Sources: a contender is checking in on a big-name veteran. Details later.', [2, 12]),
   W('rumor', 'P', 'good', 'Trade chatter involving {p}? Probably nothing. Probably.', [2, 12]),
   W('rumor', 'P', 'star+vet', 'There is a rumor circling {p}. I will not say more. Stay tuned.', [2, 12]),
+
+  // ---------------------------------------------------------------- hate mail (fans yelling at players; football-only, no personal attacks)
+  W('hatemail', 'P', 'injured', 'Dear {p}: you are hurt AGAIN? My fantasy team has filed a formal complaint. Get healthy.'),
+  W('hatemail', 'P', 'injured+star', '{p}. {inj}. In THIS economy. Sit down, rest up, and come back in one piece or do not come back at all (please come back).'),
+  W('hatemail', 'P', 'injured+qb', 'To {p}: the {tc} offense without you is a sitcom. Heal up. We are begging.'),
+  W('hatemail', 'P', 'paid', 'Hey {p}, for that contract I expect you to also drive me to the airport.'),
+  W('hatemail', 'P', 'paid+star', '{p} making all that money and STILL cannot fix my Sunday blood pressure.'),
+  W('hatemail', 'P', 'paid+qb', '{p}: I would like a refund on the whole season. Sincerely, every {tc} fan.'),
+  W('hatemail', 'P', 'qb', 'Dear {p}, throw the ball to the people in {tc} jerseys. Love, a concerned citizen.'),
+  W('hatemail', 'P', 'qb+vet', 'Respectfully {p}, the {tc} fans need you to stop doing the thing where you hold the ball for nine seconds.'),
+  W('hatemail', 'P', 'rookie', 'Rookie {p}, welcome to the league, now please stop making me nervous.'),
+  W('hatemail', 'P', 'rookie+qb', 'Rookie QB {p}, the {tc} fans have been patient. Emphasis on HAVE BEEN.'),
+  W('hatemail', 'P', 'st', 'Dear {p}: it is a short kick. You have one job. ONE.'),
+  W('hatemail', 'P', 'st', '{p} gave me a heart attack on that kick. Medical bills incoming.'),
+  W('hatemail', 'P', 'wr', 'Dear {p}: catch the ball. Signed, a fan who watched a drop in slow motion for 20 minutes.'),
+  W('hatemail', 'P', 'wr+star', '{p}, you are great. You are also the reason I am tired. Stop making me scream at my TV.'),
+  W('hatemail', 'P', 'rb', '{p}, one yard. ONE yard. I could have walked it.'),
+  W('hatemail', 'P', 'te', 'Hey {p}, a tight end who drops it is just a large wide receiver with a bad attitude. Fix it.'),
+  W('hatemail', 'P', 'ol', 'Dear {p}: block somebody. Sincerely, a quarterback somewhere.'),
+  W('hatemail', 'P', 'dl', '{p}, the quarterback was RIGHT THERE. Right there!'),
+  W('hatemail', 'P', 'lb', 'Dear {p}: you can tackle people. I have seen it. Please do it more.'),
+  W('hatemail', 'P', 'db', '{p}, that was your guy. He was YOUR guy.'),
+  W('hatemail', 'P', 'ancient', '{p}, {age} years old and still ruining my week. Retire (do not retire).'),
+  W('hatemail', 'P', 'vet', 'Hey {p}, I appreciate the career, but the 2-minute drill was a crime scene.'),
+  W('hatemail', 'P', 'good', '{p}, you are so good that when you mess up I take it personally.'),
+  W('hatemail', 'P', 'star', 'Dear {p}: please stop making every other {pos} look bad. It is rude.'),
+  W('hatemail', 'P', 'payday', '{p}, if you want a big contract maybe do not play like that the week the {t} front office is watching. Just saying.'),
+
+  // ---------------------------------------------------------------- hot takes (fictional fans and commentators)
+  W('hottake', 'T', 'hot', 'HOT TAKE: the {tf} are not a fluke. They are a problem.'),
+  W('hottake', 'T', 'cold', 'Hot take: the {tf} season is already over and everybody is too polite to say it.'),
+  W('hottake', 'T', 'top', 'Hot take: the {tf} win this division by three games and nobody can stop them.'),
+  W('hottake', 'T', 'winless', 'Hot take: the {tf} are going 0-17. Tell your mother.'),
+  W('hottake', 'T', 'any', 'Unpopular opinion: the {tf} are better than their record and everybody knows it.'),
+  W('hottake', 'T', 'any', 'Hot take: the {tf} are the most underrated team in the league and I will not be taking questions.'),
+  W('hottake', 'T', 'any', 'Controversial: {coach} gets too much credit and {star} gets too little.'),
+  W('hottake', 'T', 'coach', 'The {tf} have a coach who thinks he is a genius. He might be right and I hate it.'),
+  W('hottake', 'T', 'rivalry', 'Hot take: {coach} beats {rival} when it matters and I will fight anyone who disagrees.'),
+  W('hottake', 'T', 'any', 'My hot take: {qb} is a top-five QB in the league and I do not care who is mad about it.'),
+  W('hottake', 'P', 'qb+good', 'Hot take: {p} is a top-three QB and the {tc} fans do not deserve him.'),
+  W('hottake', 'P', 'qb', 'Hot take: {p} is overrated. There, I said it. Fight me.'),
+  W('hottake', 'P', 'star', 'Hot take: {p} is the best {pos} in the league and it is not close.'),
+  W('hottake', 'P', 'star+vet', 'Hot take: {p} is still the best at {age}. Father Time can wait.'),
+  W('hottake', 'P', 'rookie+good', 'Hot take: {p} is going to be Rookie of the Year and it will be unanimous.'),
+  W('hottake', 'P', 'wr', 'Hot take: {p} is the most overrated receiver in football. Reply guys, form a line.'),
+  W('hottake', 'P', 'rb', 'Hot take: {p} is the best back in the league and running backs deserve more money.'),
+  W('hottake', 'P', 'st', 'Hot take: a great kicker is worth more than a great receiver. Argue with me.'),
+  W('hottake', 'P', 'paid', 'Hot take: {p} is NOT worth that contract. Ask me again in a year.'),
+  W('hottake', 'P', 'payday', 'Hot take: {p} is underpaid and the {t} know it. Pay the man.'),
+  W('hottake', 'P', 'injured', 'Hot take: {p} should sit until he is 100 percent. Nobody wins a title in September.'),
+  W('hottake', 'L', 'any', 'Hot take: this is the best season of football in a decade. Do not @ me.'),
+  W('hottake', 'L', 'any', 'Hot take: the league is too soft. Back in my day we had MORE weeks.'),
+  W('hottake', 'L', 'any', 'Hot take: week {wk} is where we find out who is real. Everyone else is just practicing.', [1, 18]),
+  W('hottake', 'L', 'any', 'The preseason power rankings were a work of fiction and I stand by that.', [0, 4]),
+  W('hottake', 'L', 'any', 'Hot take: we need more primetime games and fewer people explaining what a first down is.'),
+
+  // ---------------------------------------------------------------- the Leakers (parody analysts; invented people only)
+  W('leak-loud', 'P', 'star', 'LET ME TELL YOU SOMETHING ABOUT {p}!!! Greatness is not a rumor. It is a LIFESTYLE. Nobody else in the league is doing what he is doing. Nobody!'),
+  W('leak-loud', 'P', 'qb', 'I have been saying it for YEARS: {p} is the {tc} offense. Without him they are a very expensive marching band.'),
+  W('leak-loud', 'T', 'cold', 'The {tf} are in CRISIS. There is no other word. CRISIS. And {coach} knows it.'),
+  W('leak-loud', 'T', 'hot', 'The {tf} are RED HOT. Respect the process. Respect the grind. RESPECT. THE. {tc}.'),
+  W('leak-loud', 'T', 'any', 'I want to be very clear: the {tf} are not who we thought they were. And I am the one who thought it.'),
+  W('leak-loud', 'L', 'any', 'WEEK {wk}!!! I have never been more excited and also more furious about football than I am RIGHT NOW.', [1, 18]),
+  W('leak-scoop', 'P', 'payday', 'BREAKING: sources tell The League Leak that {p} and the {t} are expected to talk contract soon. A significant number is on the table.'),
+  W('leak-scoop', 'P', 'injured', 'UPDATE: {p} is dealing with {inj}, per sources. More as we get it.'),
+  W('leak-scoop', 'P', 'good', 'Sources: multiple teams have asked about {p}. The {t} are not budging, for now.', [2, 12]),
+  W('leak-scoop', 'P', 'rookie+good', 'Hearing {p} has been turning heads in {tc} all week. Coaches love him.'),
+  W('leak-scoop', 'T', 'coach', 'League source on {coach} and the {tf}: "they believe they are the team to beat." Take that however you like.'),
+  W('leak-scoop', 'L', 'any', 'Sources: a trade is brewing involving a former All-Pro. Names to come. Stay close.', [2, 12]),
+  W('leak-film', 'P', 'star', 'Watched the {pl} tape twice. The way he sets up the defender before the break? That is the whole game, folks.'),
+  W('leak-film', 'P', 'good+qb', '{pl}’s footwork in the pocket is a master class. Quick feet, quiet eyes, and the offense never panics.'),
+  W('leak-film', 'T', 'any', 'Film does not lie: the {tf} are winning at the line of scrimmage. Everything else is noise.'),
+  W('leak-film', 'T', 'cold', 'Here is the {tf} problem on tape: they are late on every rotation. It is fixable. It is just not fixed.'),
+  W('leak-ex', 'P', 'qb', 'Back in my day a quarterback like {p} would have gotten hit three times a half. I am not saying he is soft. I am saying I noticed.'),
+  W('leak-ex', 'P', 'vet', 'Play {age} years old in this league and you either have the mind or you have a good trainer. {p} has both.'),
+  W('leak-ex', 'P', 'rookie', 'Rookies today are bigger and faster than we ever were. {p} will be fine. His hands will need a few weeks.'),
+  W('leak-ex', 'T', 'any', 'I played in a locker room like the {tf} have. The coach sets the tone. That is the whole job.'),
+  W('leak-stats', 'P', 'star', 'Stat of the week: {p} ({ovr} OVR) is in a tier of his own. The next closest {pos} is not within shouting distance.'),
+  W('leak-stats', 'T', 'top', 'The {tf} lead their division at {rec}. Teams that start like this make the playoffs more often than not.'),
+  W('leak-stats', 'T', 'hot', 'The {tf} have won back-to-back. Over a full season, that is the difference between January and the couch.'),
+  W('leak-stats', 'L', 'any', 'Week {wk} reminder: one game is one game. Revisit your takes after four.', [1, 4]),
+
+  // ---------------------------------------------------------------- The Hot Seat (two panelists who always disagree) + a comic
+  W('leak-rex', 'P', 'star', 'THE HOT SEAT, Rex says: {p} is a once-in-a-generation {pos}. Debate over. Next topic.'),
+  W('leak-rex', 'P', 'good', 'Rex on {p}: we are looking at a future All-Pro. Put it in writing. I just did.'),
+  W('leak-rex', 'P', 'injured', 'Rex says {p} is back in no time. Gil says otherwise. I say Gil is wrong. Again.'),
+  W('leak-rex', 'P', 'payday', 'Rex: pay {p} NOW. Every week you wait costs the {t} money. It is basic math.'),
+  W('leak-rex', 'T', 'hot', 'Rex: the {tf} are legit contenders and anyone who says different has not watched them play.'),
+  W('leak-rex', 'T', 'cold', 'Rex: the {tf} are one win from a turnaround. One. Bookmark this.'),
+  W('leak-rex', 'T', 'any', 'Rex on the {tf}: the roster is too good to lose for long. {star} alone is worth the price of admission.'),
+  W('leak-rex', 'L', 'any', 'Rex: week {wk} will be the best week of the season. Gil: it will not. We will see.'),
+  W('leak-gil', 'P', 'star', 'THE HOT SEAT, Gil says: {p} is great. {p} is also overhyped. Both can be true. I said what I said.'),
+  W('leak-gil', 'P', 'good', 'Gil on {p}: good, not great. I will take the negative and I will be right.'),
+  W('leak-gil', 'P', 'injured', 'Gil: {p} with {inj}? Do not count on him back soon. Rex is going to be mad.'),
+  W('leak-gil', 'P', 'paid', 'Gil says {p} is NOT worth that contract. Rex says he is. Gil is right. Rex knows it.'),
+  W('leak-gil', 'T', 'hot', 'Gil: the {tf} are a mirage. Schedule is soft. Wait and see.'),
+  W('leak-gil', 'T', 'cold', 'Gil: the {tf} are exactly who I said they were. Tell Rex I said hello.'),
+  W('leak-gil', 'T', 'any', 'Gil on the {tf}: the record says one thing, the film says another. I trust the film.'),
+  W('leak-gil', 'L', 'any', 'Gil: week {wk} will be a letdown. The good teams will win and the rest will not matter.'),
+  W('leak-comic', 'P', 'any', 'Dewey Fumble here: {p} played so well I forgot I was supposed to be a hater. Back to work.'),
+  W('leak-comic', 'P', 'qb', 'Dewey: if {p} throws one more pass like that, the {t} are going to need a bigger cushion on the bench.'),
+  W('leak-comic', 'P', 'st', 'Dewey: {p} is the only man in football who gets paid to be nervous in public. Respect.'),
+  W('leak-comic', 'T', 'cold', 'Dewey on the {tf}: so bad this week the punter asked for a transfer.'),
+  W('leak-comic', 'T', 'hot', 'Dewey on the {tf}: so good this week the other team asked if they could watch from the sideline.'),
+  W('leak-comic', 'T', 'any', 'Dewey: breaking news, the {tf} are a football team. More as it develops.'),
+  W('leak-comic', 'L', 'any', 'Dewey: the NFL schedule is just a very long group chat that sometimes becomes football.'),
 ];
 
 // Game highlights (used for the "around the league" feed)
@@ -427,9 +533,44 @@ export const OUTLETS = ['The Gridiron Ledger', 'Pigskin Daily', 'Sunday Sentinel
 export interface Account {
   handle: string;
   name: string;
-  kind: 'insider' | 'fan' | 'stats' | 'comic';
+  kind: 'insider' | 'fan' | 'stats' | 'comic' | 'human' | 'leaker';
   verified?: boolean;
+  /** Short label shown on Leaker accounts. */
+  badge?: string;
 }
+
+/**
+ * The Leakers: parody-style analyst archetypes with invented names. Not real people, and nothing they post is a quote from one.
+ * The cat picks the voice: leak-loud, -scoop, -film, -ex, -stats, -rex and -gil (The Hot Seat), -comic.
+ */
+export const LEAKERS: Record<string, Account> = {
+  'leak-loud': { handle: 'StuTheVolume', name: 'Stu \u201cThe Volume\u201d Bellows', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Debate' },
+  'leak-scoop': { handle: 'AdrianScoopley', name: 'Adrian Scoopley', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Breaking' },
+  'leak-film': { handle: 'CoachDaleWhiteboard', name: 'Dale Whiteboard', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Film' },
+  'leak-ex': { handle: 'BigRodTanner', name: 'Big Rod Tanner', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Former QB' },
+  'leak-rex': { handle: 'RexOnTheHotSeat', name: 'Rex Holloway', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Hot Seat' },
+  'leak-gil': { handle: 'GilOnTheHotSeat', name: 'Gil Mancuso', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Hot Seat' },
+  'leak-comic': { handle: 'DeweyFumble', name: 'Dewey Fumble', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Late Night' },
+  'leak-stats': { handle: 'MinaByTheNumbers', name: 'Mina Cardwell', kind: 'leaker', verified: true, badge: 'Leaker \u00b7 Numbers' },
+};
+
+/** Fictional everyday fans for hot takes and hate mail. */
+export const HUMANS: Account[] = [
+  { handle: 'DaveFromDayton', name: 'Dave from Dayton', kind: 'human' },
+  { handle: 'KristenAlbright', name: 'Kristen Albright', kind: 'human' },
+  { handle: 'BigMoJenkins', name: 'Marcus \u201cBig Mo\u201d Jenkins', kind: 'human' },
+  { handle: 'TerriVoss77', name: 'Terri Voss', kind: 'human' },
+  { handle: 'RickyPellegrino', name: 'Ricky Pellegrino', kind: 'human' },
+  { handle: 'JessOkonkwo', name: 'Jess Okonkwo', kind: 'human' },
+  { handle: 'SeasonTicketGary', name: 'Gary (Season Ticket Guy)', kind: 'human' },
+  { handle: 'BrendaHalloran', name: 'Brenda Halloran', kind: 'human' },
+  { handle: 'TyronePruitt', name: 'Tyrone Pruitt', kind: 'human' },
+  { handle: 'SamWhitaker', name: 'Sam Whitaker', kind: 'human' },
+  { handle: 'LenaOrtiz', name: 'Lena Ortiz', kind: 'human' },
+  { handle: 'FrankDombrowski', name: 'Frank Dombrowski', kind: 'human' },
+  { handle: 'NateEverhart', name: 'Nate Everhart', kind: 'human' },
+  { handle: 'ColleenBrandt', name: 'Colleen Brandt', kind: 'human' },
+];
 /** League-wide fictional accounts. Team beat accounts are built from team data in the engine. */
 export const ACCOUNTS: Account[] = [
   { handle: 'LeagueInsiderLou', name: 'League Insider Lou', kind: 'insider', verified: true },
