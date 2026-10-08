@@ -10,9 +10,9 @@ const weekLabel = (w: number) => WEEK_LABELS[w] ?? `Week ${w}`;
 /** Full read of a generated story: /story/:season/:week/:id */
 export function StoryPage() {
   const { season: s, week: w, id } = useParams();
-  const { teams, players, games } = useLeague();
+  const { teams, players, games, moments } = useLeague();
   const season = Number(s), week = Number(w);
-  const data = useMemo(() => ({ teams, players, games, season, week }), [teams, players, games, season, week]);
+  const data = useMemo(() => ({ teams, players, games, season, week, resultsWeek: week - 1, moments }), [teams, players, games, moments, season, week]);
   const found = useMemo(() => {
     const idx = buildIndex(data);
     const all = weekNews(data, idx);
