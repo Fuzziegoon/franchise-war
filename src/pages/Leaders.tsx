@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLeague } from '../lib/league';
+import { fmtStat } from '../lib/fmt';
 import { num, STAT_TABS, type Row, type StatTab } from '../lib/types';
 
 const DEFAULT_SORT: Record<StatTab, string> = {
@@ -84,11 +85,9 @@ export default function Leaders() {
                     </td>
                     <td>{r.Team}</td>
                     {cols.map((c) => {
-                      const v = r[c];
-                      const n = num(v);
                       return (
                         <td key={c} className="num">
-                          {n !== null && !Number.isInteger(n) ? n.toFixed(1) : (v ?? '')}
+                          {fmtStat(c, r[c])}
                         </td>
                       );
                     })}
