@@ -394,7 +394,7 @@ function gameSlots(gc: GameCtx, d: LeagueData, idx: Index, rng: Rng): Slots {
     wcoach: gc.w.coach ?? 'CPU',
     lcoach: gc.l.coach ?? 'CPU',
     margin: gc.ws - gc.ls,
-    wk: d.week,
+    wk: d.resultsWeek ?? d.week,
     star: star ? playerName(star) : 'the star',
   };
 }
@@ -567,8 +567,8 @@ export function generateTweets(d: LeagueData, idx: Index, count = 24, opts: { fi
     const sh = home.star ? playerName(home.star) : 'their best player';
     const lines = [
       `THIS WEEK: ${label(away)} at ${label(home)}. ${sa} against ${sh} is the matchup to watch.`,
-      `Week ${d.week} preview: ${away.team.Nickname} visit the ${home.team.Nickname}. Both sides will be looking at last week's tape.`,
-      `${away.team.City} at ${home.team.City} this week. ${sh} and the ${home.team.Nickname} are home. Who are you picking?`,
+      `Week ${d.week} preview: ${away.team['Nickname (click)']} visit the ${home.team['Nickname (click)']}. Both sides will be looking at last week's tape.`,
+      `${away.team.City} at ${home.team.City} this week. ${sh} and the ${home.team['Nickname (click)']} are home. Who are you picking?`,
     ];
     const acct = pickAccount('highlight', home.abbr, idx, rng3);
     const coachGame = !!(home.coach || away.coach);
