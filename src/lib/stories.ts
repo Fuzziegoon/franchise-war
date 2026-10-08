@@ -5,14 +5,18 @@ import {
   ACCOUNTS, HIGHLIGHTS, HUMANS, LEAKERS, NEWS, OUTLETS, RECAPS, REPORTERS, TWEETS,
   type Account, type NewsTpl, type TweetTpl, type Who,
 } from './storyData';
-import { num, playerName, type Game, type Player, type Team } from './types';
+import { num, playerName, type Game, type Moment, type Player, type Team } from './types';
 
 export interface LeagueData {
   teams: Team[];
   players: Player[];
   games: Game[];
   season: number;
+  /** The week being viewed (this week's matchups and previews). */
   week: number;
+  /** The week whose finished games and stats get written up. Defaults to `week`; the site passes week - 1. */
+  resultsWeek?: number;
+  moments?: Moment[];
 }
 
 export interface NewsItem {
@@ -171,7 +175,7 @@ export function buildIndex(d: LeagueData): Index {
       ps.filter((p) => ['qb', 'rb', 'wr', 'te', 'dl', 'lb', 'db'].includes(GROUP[String(p.Position)] ?? '')).slice(0, 4),
     );
   }
-  const hasResults = d.games.some((g) => num(g.Season) === d.season && isFinal(g) && g.Stage !== 'Preseason' && (num(g.Week) ?? 0) <= d.week);
+  const hasResults = d.games.some((g) => num(g.Season) === d.season && isFinal(g) && g.Stage !== 'Preseason' && (num(g.Week) ?? 0) <= (d.resultsWeek ?? d.week));
   return { teams, playerTags: playerTagMap, coachTeams, skillPlayers, hasResults };
 }
 
@@ -348,7 +352,7 @@ interface GameCtx {
 export function gamesForWeek(d: LeagueData, idx: Index): GameCtx[] {
   const out: GameCtx[] = [];
   for (const g of d.games) {
-    if (num(g.Season) !== d.season || num(g.Week) !== d.week || !isFinal(g) || g.Stage === 'Preseason') continue;
+    if (num(g.Season) !== d.season || num(g.Week) !== (d.resultsWeek ?? d.week) || !isFinal(g) || g.Stage === 'Preseason') continue;
     const hs = num(g['Home Score'])!;
     const as = num(g['Away Score'])!;
     if (hs === as) continue;
@@ -368,9 +372,16 @@ export function gamesForWeek(d: LeagueData, idx: Index): GameCtx[] {
   return out;
 }
 
+/** A winning-team player who actually had a big game, from the Moments the Sheet logged. */
+function momentStar(d: LeagueData, abbr: string): Player | undefined {
+  const w = d.resultsWeek ?? d.week;
+  const m = (d.moments ?? []).find((x) => num(x.Season) === d.season && num(x.Week) === w && x.Team === abbr && x.PlayerID);
+  return m ? d.players.find((q) => q.PlayerID === m.PlayerID) : undefined;
+}
+
 function gameSlots(gc: GameCtx, d: LeagueData, idx: Index, rng: Rng): Slots {
   const skill = idx.skillPlayers.get(gc.w.abbr) ?? [];
-  const star = skill.length ? rng.pick(skill) : gc.w.star;
+  const star = momentStar(d, gc.w.abbr) ?? (skill.length ? rng.pick(skill) : gc.w.star);
   return {
     w: String(gc.w.team['Nickname (click)']),
     l: String(gc.l.team['Nickname (click)']),
@@ -402,11 +413,16 @@ function pickGameTpl<T extends { who: Who; need: string }>(list: T[], gc: GameCt
   return rng.pick(specific.length && rng.next() < 0.7 ? specific : cands);
 }
 
-export function generateRecaps(d: LeagueData, idx: Index, limit = 4): NewsItem[] {
+const notable = (g: GameCtx) => (g.tags.has('upset') ? 3 : 0) + (g.tags.has('blowout') ? 2 : 0) + (g.tags.has('close') ? 2 : 0) + (g.tags.has('shutout') ? 2 : 0);
+
+/** Coach games first, then the most notable results around the league. */
+export function generateRecaps(d: LeagueData, idx: Index, limit = 8): NewsItem[] {
   const rng = makeRng(`recap|${d.season}|${d.week}`);
-  const games = gamesForWeek(d, idx).sort((a, b) => Number(b.h2h) - Number(a.h2h) || Number(b.involvesCoach) - Number(a.involvesCoach));
+  const games = gamesForWeek(d, idx).sort(
+    (a, b) => Number(b.h2h) - Number(a.h2h) || Number(b.involvesCoach) - Number(a.involvesCoach) || notable(b) - notable(a),
+  );
   const out: NewsItem[] = [];
-  for (const gc of games.filter((g) => g.involvesCoach).slice(0, limit)) {
+  for (const gc of games.slice(0, limit)) {
     const tpl = pickGameTpl(RECAPS, gc, rng);
     if (!tpl) continue;
     const slots = gameSlots(gc, d, idx, rng);
@@ -417,7 +433,7 @@ export function generateRecaps(d: LeagueData, idx: Index, limit = 4): NewsItem[]
       body: fill(tpl.b, slots),
       ...pickReporter(rng),
       teams: [gc.w.abbr, gc.l.abbr],
-      coachStory: true,
+      coachStory: gc.involvesCoach,
     });
   }
   return out;
@@ -536,6 +552,37 @@ export function generateTweets(d: LeagueData, idx: Index, count = 24, opts: { fi
       ...engagement(rng2, acct, gc.h2h ? 4 : 1.5),
       teams: [gc.w.abbr, gc.l.abbr],
       scope: gc.involvesCoach ? 'coach' : 'highlight',
+    });
+  }
+
+  // this week's matchups, from games already on the schedule but not yet played
+  const rng3 = makeRng(`previews|${d.season}|${d.week}`);
+  const upcoming = d.games.filter((g) => num(g.Season) === d.season && num(g.Week) === d.week && !isFinal(g) && g.Stage !== 'Preseason');
+  for (const g of upcoming.slice(0, 12)) {
+    const home = idx.teams.get(g.Home);
+    const away = idx.teams.get(g.Away);
+    if (!home || !away) continue;
+    const label = (t: TeamCtx) => `${t.team.City} (${t.rec.w}-${t.rec.l}${t.rec.t ? `-${t.rec.t}` : ''})`;
+    const sa = away.star ? playerName(away.star) : 'their best player';
+    const sh = home.star ? playerName(home.star) : 'their best player';
+    const lines = [
+      `THIS WEEK: ${label(away)} at ${label(home)}. ${sa} against ${sh} is the matchup to watch.`,
+      `Week ${d.week} preview: ${away.team.Nickname} visit the ${home.team.Nickname}. Both sides will be looking at last week's tape.`,
+      `${away.team.City} at ${home.team.City} this week. ${sh} and the ${home.team.Nickname} are home. Who are you picking?`,
+    ];
+    const acct = pickAccount('highlight', home.abbr, idx, rng3);
+    const coachGame = !!(home.coach || away.coach);
+    out.push({
+      id: `p-${g.GameID}`,
+      cat: 'preview',
+      handle: acct.handle,
+      name: acct.name,
+      verified: !!acct.verified,
+      text: rng3.pick(lines),
+      minsAgo: 0,
+      ...engagement(rng3, acct, coachGame ? 4 : 1.5),
+      teams: [home.abbr, away.abbr],
+      scope: coachGame ? 'coach' : 'league',
     });
   }
 
