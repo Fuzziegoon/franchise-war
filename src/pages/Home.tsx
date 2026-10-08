@@ -40,7 +40,11 @@ export default function Home() {
   const idx = useMemo(() => buildIndex(data), [data]);
   const news = useMemo(() => weekNews(data, idx), [data, idx]);
   const tweets = useMemo(() => {
-    const base = [...momentTweets(moments, season, week - 1), ...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26)];
+    const ms = momentTweets(moments, season, week - 1)
+      .filter((t) => !/^(BOOM|PUNTER WATCH)/.test(t.text))
+      .slice(0, 12)
+      .map((t, i) => ({ ...t, minsAgo: 6 + i * 28 }));
+    const base = [...ms, ...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26)].sort((a, b) => a.minsAgo - b.minsAgo);
     const v = videos[0];
     if (!v) return base;
     const vt: TweetItem = {
