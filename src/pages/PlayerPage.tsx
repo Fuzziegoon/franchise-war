@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLeague } from '../lib/league';
+import { fmtStat } from '../lib/fmt';
 import { STAT_TABS, num, playerName, type Row } from '../lib/types';
 
 export default function PlayerPage() {
@@ -73,8 +74,7 @@ export default function PlayerPage() {
                 <tbody>
                   <tr>
                     {cols.map((c) => {
-                      const n = num(r![c]);
-                      return <td key={c} className="num">{n !== null && !Number.isInteger(n) ? n.toFixed(1) : (r![c] ?? '')}</td>;
+                      return <td key={c} className="num">{fmtStat(c, r![c])}</td>;
                     })}
                   </tr>
                 </tbody>
