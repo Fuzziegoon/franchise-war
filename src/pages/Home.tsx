@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLeague } from '../lib/league';
 import { curatedTweets, isTweet, momentTweets, releasedWeeks } from '../lib/curated';
-import { buildIndex, generateTweets, isPreviewWeek, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
+import { buildIndex, generateTweets, weekNews, type NewsItem, type TweetItem } from '../lib/stories';
 import { coachRecords, pct, recordText } from '../lib/standings';
 import { lastWeekScores } from '../lib/scores';
 import { num, type Article, type Game } from '../lib/types';
@@ -36,11 +36,11 @@ export default function Home() {
   const written = published.filter((a) => !isVideo(a) && !isTweet(a) && num(a.Week) === week);
   const featured = videos[0];
 
-  const data = useMemo(() => ({ teams, players, games, season, week }), [teams, players, games, season, week]);
+  const data = useMemo(() => ({ teams, players, games, season, week, resultsWeek: week - 1, moments }), [teams, players, games, season, week, moments]);
   const idx = useMemo(() => buildIndex(data), [data]);
   const news = useMemo(() => weekNews(data, idx), [data, idx]);
   const tweets = useMemo(() => {
-    const base = [...momentTweets(moments, season, week), ...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26, { filler: isPreviewWeek(week) })];
+    const base = [...momentTweets(moments, season, week - 1), ...curatedTweets(articles, season, week), ...generateTweets(data, idx, 26)];
     const v = videos[0];
     if (!v) return base;
     const vt: TweetItem = {
